@@ -1,5 +1,5 @@
 # faplus
-FalstApi 的增强版本，实现类Django的框架
+基于 FalstApi 的增强版本，能够实现类似于Django的框架逻辑
 
 ## 快速开始
 
