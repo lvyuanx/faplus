@@ -1,0 +1,12 @@
+fastapi~=0.115.2
+Markdown~=3.7
+uvicorn[standard]~=0.32.0
+tortoise-orm~=0.21.7
+aerich~=0.7.2
+aiomysql~=0.2.0
+cryptography~=43.0.3
+PyJWT~=2.9.0
+redis~=5.2.0
+pytz~=2024.2
+python-multipart~=0.0.20
+aiofiles~=24.1.0
