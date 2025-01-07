@@ -16,9 +16,17 @@ pip install git+https://github.com/lvyuanx/faplus@<tag>
 python -m faplus.management startproject
 ```
 
-### 3.启动项目
+### 3.修复config.py中的配置
+数据库合redis默认开启，可以关闭
+
+### 4.初始化数据库
+```
+python manage.py init_dbinit_db
+```
+
+### 5.启动项目
 ```
 python manage.py runserver
 ```
 
-只需简单的三步，即可开始一个新的项目！
+只需简单的步骤，即可开始一个新的项目！
