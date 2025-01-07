@@ -45,13 +45,6 @@ def startproject(root_dir: str, root_app: str):
         replace_dict={"manage_template": [("root_app", root_app)]},
     )
 
-    file_util.copy_file(
-        src_dir=template_dir,
-        dst_dir=root_dir,
-        file_names=["requirements_template"],
-        replace_suffix=".txt",
-    )
-
 
 def startapp(app_dir: str, app_name: str):
 

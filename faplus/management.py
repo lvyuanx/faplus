@@ -135,8 +135,6 @@ class Management:
 
         generate_project.startproject(os.getcwd(), self.command_args.name)
 
-        self._execute_command("pip install -r requirements.txt")
-
     def startapp(self):
         """创建app"""
         from faplus.cli import generate_project
