@@ -28,6 +28,8 @@ pip install -r requirements.txt
 
 其中<tag>为版本号，如：v0.0.7 （0.0.7之前的版本存在问题，请勿使用）
 
+请在[releases](https://github.com/lvyuanx/faplus/releases)中查看所有版本号
+
 ### 2.初始化项目
 
 进入项目的根目录下执行：
