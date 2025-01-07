@@ -16,7 +16,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     package_data={
-        "": ["cli/templates/*"],
+        "": ["cli/templates/*", "cache/backends/*", "cache/startups/*"],
     },
     python_requires=">=3.11",
     install_requires=[
