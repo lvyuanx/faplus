@@ -17,7 +17,7 @@ python -m faplus.management startproject
 ```
 
 ### 3.修复config.py中的配置
-数据库合redis默认开启，可以关闭
+数据库和redis默认开启（可以关闭）
 
 ### 4.初始化数据库
 ```
