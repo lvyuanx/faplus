@@ -15,6 +15,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    package_data={
+        "": ["cli/templates/*"],
+    },
     python_requires=">=3.11",
     install_requires=[
         "fastapi~=0.115.2",
