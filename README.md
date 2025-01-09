@@ -44,7 +44,7 @@ python -m faplus.management startproject
 ### 4.初始化数据库
 
 ```
-python manage.py init_dbinit_db
+python manage.py init_db
 ```
 
 ### 5.启动项目
