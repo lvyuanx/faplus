@@ -34,7 +34,7 @@ DEBUG = get_setting_with_default("DEBUG")
 def has_model_subclasses(module):
     for _, obj in inspect.getmembers(module):
         # 判断对象是否是类，并且是 Model 的子类
-        if inspect.isclass(obj) and issubclass(obj, Model):
+        if obj is not Model and inspect.isclass(obj) and issubclass(obj, Model):
             return True
     return False
 
