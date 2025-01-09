@@ -10,11 +10,13 @@
 import logging
 
 from fastapi import Request, Response
+from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from faplus.utils import get_setting_with_default
 from faplus.auth.utils import user_util
 from faplus.utils import token_util
+from starlette.requests import cookie_parser
 
 FAP_DOCS_URL = get_setting_with_default("FAP_DOCS_URL")
 FAP_REDOC_URL = get_setting_with_default("FAP_REDOC_URL")
@@ -31,7 +33,7 @@ class DocsLoginMiddleware(BaseHTTPMiddleware):
         if not path.startswith(FAP_DOCS_URL) and not path.startswith(FAP_REDOC_URL):
             return await call_next(request)
         
-        tk = request.cookies.get("token")
+        tk = request.cookies.get("doc-token")
         if tk and await token_util.verify_token(tk):  # 验证token
             return await call_next(request)
         
@@ -42,9 +44,9 @@ class DocsLoginMiddleware(BaseHTTPMiddleware):
             try:
                 user = await user_util.authenticate_user(username=username, password=password)
                 if user:
-                    token = await token_util.create_token(user)
-                    response = await call_next(request)
-                    response.set_cookie(key="token", value=token, httponly=DEBUG)
+                    token = await token_util.create_token({"doc": ""})
+                    response = RedirectResponse(url=path, status_code=302)
+                    response.set_cookie(key="doc-token", value=token, httponly=DEBUG)
                     return response
             except Exception as e:
                 logging.warning("", exc_info=True)
