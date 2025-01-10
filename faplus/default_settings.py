@@ -7,6 +7,7 @@ Date: 2024/11/19 17:23:40
 Description: FAP用到的所有默认配置
 """
 from pathlib import Path
+from . import const
 
 DEBUG = True
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -83,9 +84,6 @@ FAP_SECRET_KEY = None
 # tk加密算法
 FAP_ALGORITHM = "HS256"
 
-# 访问令牌过期时间
-FAP_ACCESS_TOKEN_EXP = 30
-
 # jwt白名单
 FAP_JWT_WHITES = []
 
@@ -94,6 +92,9 @@ FAP_LOGIN_URL = "/user/login"
 
 # token标记
 FAP_TOKEN_TAG = "X-Authorization"
+
+# token 来源
+FAP_TOKEN_SOURCE = const.TokenSourceEnum.Cookie
 
 # 开机自启的模块
 FAP_STARTUP_FUNCS = []

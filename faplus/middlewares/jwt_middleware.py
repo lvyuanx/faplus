@@ -7,6 +7,7 @@ Date: 2024/11/19 15:56:19
 Description: 登录中间件
 """
 import logging
+from typing import Union, Callable, Dict
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -19,11 +20,40 @@ from faplus.utils import (
 from faplus.utils import token_util
 from faplus.auth.utils import user_util
 from faplus.cache import cache
+from faplus import const
 
 
 logger = logging.getLogger(__package__)
 
 FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
+FAP_TOKEN_SOURCE = get_setting_with_default("FAP_TOKEN_SOURCE")
+TokenSourceEnum = const.TokenSourceEnum
+
+# 定义类型别名
+TokenHandler = Callable[[Request], Union[None, str]]
+
+def _token_handle() -> TokenHandler:
+    handle: Dict[TokenSourceEnum, TokenHandler] = {
+        TokenSourceEnum.Cookie: lambda request: request.cookies.get(FAP_TOKEN_TAG),
+        TokenSourceEnum.Header: lambda request: request.headers.get(FAP_TOKEN_TAG),
+        TokenSourceEnum.Query: lambda request: request.query_params.get(FAP_TOKEN_TAG),
+        TokenSourceEnum.Body : lambda request: request.json().get(FAP_TOKEN_TAG) if request.json() else None,
+   }
+    try:
+        return handle[FAP_TOKEN_SOURCE]
+    except Exception:
+        logger.error("token处理器获取失败", exc_info=True)
+    
+    return lambda request: None
+
+token_handle = _token_handle()
+    
+
+def get_token(request: Request) -> str | None:
+    try:
+        return token_handle(request)
+    except Exception:
+        logger.error("token获取失败", exc_info=True)
 
 
 class JwtMiddleware(BaseHTTPMiddleware):
@@ -33,7 +63,7 @@ class JwtMiddleware(BaseHTTPMiddleware):
         state = request.state
         if not state.is_static and not state.is_whitelist:
             # 获取header中的token
-            token = request.headers.get(FAP_TOKEN_TAG)
+            token = get_token(request)
             payload = await token_util.verify_token(token)
             if not payload:
                 logger.error("token验证失败")

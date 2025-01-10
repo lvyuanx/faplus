@@ -194,5 +194,15 @@ def add_time(datetime: datetime, time: str, tz: pytz.timezone = default_tz):
     """
     return datetime.astimezone(tz) + dt.timedelta(hours=int(time.split(':')[0]), minutes=int(time.split(':')[1]))
 
+def add_seconds(datetime: datetime, second: int, tz: pytz.timezone = default_tz) -> datetime:
+    """增加秒数
+    
+    :param datetime: 要增加的时间
+    :param second: 秒数
+    :param tz: 时区
+    :return: 增加后的时间
+    """
+    return datetime.astimezone(tz) + dt.timedelta(seconds=second)
+
 
 

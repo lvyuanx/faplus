@@ -13,24 +13,24 @@ from datetime import datetime, timedelta
 import jwt  # PyJWT库
 
 from faplus import const
-from faplus.utils import get_setting_with_default
+from faplus.utils import get_setting_with_default, time_util
 from faplus.cache import cache
 
 
 SECRET_KEY = get_setting_with_default("FAP_SECRET_KEY")
 ALGORITHM = get_setting_with_default("FAP_ALGORITHM")
-ACCESS_TOKEN_EXP = get_setting_with_default("FAP_ACCESS_TOKEN_EXP")
+FAP_TOKEN_EXPIRE = get_setting_with_default("FAP_TOKEN_EXPIRE")
 
 
 logger = logging.getLogger(__package__)
 
 
-async def create_token(data: dict, expires_delta: Optional[timedelta] = None):
+async def create_token(data: dict, exp_seconds: Optional[int] = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+    if exp_seconds:
+        expire = time_util.add_seconds(time_util.now(), exp_seconds)
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXP)
+        expire = time_util.add_seconds(time_util.now(), FAP_TOKEN_EXPIRE)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     await cache.set(const.ACTIVATE_TOKEN_CK.format(tk=encoded_jwt), "1")
