@@ -15,7 +15,11 @@ import string
 from fastapi import UploadFile
 import aiofiles
 
-from faplus.media.models import SNRecord
+from faplus.media.models import SNRecord, FileRecord
+from faplus.utils import get_setting_with_default
+
+BASE_DIR = get_setting_with_default("BASE_DIR")
+MEDIA_ROOT = get_setting_with_default("FAP_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
 
 logger = logging.getLogger(__package__)
 
@@ -95,6 +99,24 @@ async def delete_file(file_path: str):
     if not os.path.exists(file_path):
         return
     os.remove(file_path)
+    
+
+async def delete_by_sns(sns: list[str]):
+
+    files = await FileRecord.filter(sn__in=sns)
+    if not files: return 
+
+    file_paths = []
+    for file in files:
+        file_paths.append(
+            os.path.join(MEDIA_ROOT, file.file_path, file.original_name)
+        )
+    
+    
+    # 删除文件对象
+    await FileRecord.filter(sn__in=sns).delete()
+    for file_path in file_paths:
+        await delete_file(file_path)
 
 
 async def get_file(file_path: str, file_name: str):
