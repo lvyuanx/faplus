@@ -11,17 +11,33 @@ import hashlib
 import logging
 import secrets
 import string
+import asyncio
+import pathlib
+from typing import List
+from contextlib import asynccontextmanager
 
 from fastapi import UploadFile
 import aiofiles
+from tortoise.transactions import in_transaction
 
 from faplus.media.models import SNRecord, FileRecord
 from faplus.utils import get_setting_with_default
 
 BASE_DIR = get_setting_with_default("BASE_DIR")
 MEDIA_ROOT = get_setting_with_default("FAP_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
+FAP_TEMP_DIR = get_setting_with_default("FAP_TEMP_DIR", os.path.join(BASE_DIR, "temp"))
 
 logger = logging.getLogger(__package__)
+
+
+@asynccontextmanager
+async def transaction_manager():
+    try:
+        async with in_transaction():
+            yield
+    except Exception as e:
+        logger.error("Error during transaction", exc_info=True)
+        raise
 
 
 async def generate_sn(len: int = 18, retry: int = 0) -> str:
@@ -90,33 +106,76 @@ async def save_upload_file(
     return (file_hash, final_file_name)
 
 
-async def delete_file(file_path: str):
-    """删除文件
+async def delete_file(file_path: str) -> bool:
+    """异步删除文件
 
     :param file_path: 文件路径
     :return: 是否删除成功
     """
     if not os.path.exists(file_path):
-        return
-    os.remove(file_path)
-    
+        logging.info(f"File {file_path} does not exist, skipping deletion.")
+        return False
 
-async def delete_by_sns(sns: list[str]):
+    try:
+        await asyncio.to_thread(os.remove, file_path)
+        logging.info(f"File {file_path} deleted successfully.")
+        return True
+    except OSError as e:
+        logging.error(f"Failed to delete file {file_path}: {e}")
+        return False
 
+async def delete_by_sns(sns: List[str]):
     files = await FileRecord.filter(sn__in=sns)
-    if not files: return 
+    if not files:
+        return
+
+    media_root = pathlib.Path(MEDIA_ROOT)
+    temp_dir = pathlib.Path(FAP_TEMP_DIR)
 
     file_paths = []
+    temp_files = []
+
+    # 验证并准备路径
     for file in files:
-        file_paths.append(
-            os.path.join(MEDIA_ROOT, file.file_path, file.original_name)
-        )
-    
-    
-    # 删除文件对象
-    await FileRecord.filter(sn__in=sns).delete()
-    for file_path in file_paths:
-        await delete_file(file_path)
+        file_path = (media_root / file.file_path / file.original_name).resolve()
+        temp_file_path = (temp_dir / file.file_path / file.original_name).resolve()
+
+        if not file_path.is_relative_to(media_root) or not temp_file_path.is_relative_to(temp_dir):
+            raise ValueError("Invalid file path")
+
+        file_paths.append(file_path)
+        temp_files.append(temp_file_path)
+
+    # 备份文件
+    for file_path, temp_file_path in zip(file_paths, temp_files):
+        try:
+            temp_file_path.parent.mkdir(parents=True, exist_ok=True)
+            file_path.rename(temp_file_path)
+        except Exception as e:
+            print(f"Failed to backup file {file_path}: {e}")
+            raise
+
+    try:
+        async with transaction_manager():
+            await FileRecord.filter(sn__in=sns).delete()  # 删除数据库记录
+            
+            for file_path in temp_files:  # 删除备份文件
+                try:
+                    await delete_file(file_path)
+                except Exception as e:
+                    print(f"Failed to delete file {file_path}: {e}")
+                    raise
+    finally:
+        # 回滚备份文件
+        for file_path, temp_file_path in zip(file_paths, temp_files):
+            if temp_file_path.exists():
+                try:
+                    file_path.parent.mkdir(parents=True, exist_ok=True)
+                    temp_file_path.rename(file_path)
+                except Exception as e:
+                    print(f"Failed to rollback file {temp_file_path}: {e}")
+                finally:
+                    temp_file_path.unlink(missing_ok=True)
 
 
 async def get_file(file_path: str, file_name: str):
