@@ -4,5 +4,5 @@ from faplus.media.apis import apis as MEDIA_APIS
 
 apis = [
     ("10", "", AUTH_APIS, "认证模块"),
-    ("12", "/media", MEDIA_APIS, "媒体服务"),
+    ("12", "/file", MEDIA_APIS, "媒体服务"),
 ]
