@@ -4,7 +4,7 @@
 Filename: file_util.py
 Author: lvyuanxiang
 Date: 2025/01/03 16:34:47
-Description: 文件操作相关工具
+Description: 文件操作相关工具, 只用于文件操作，不记录数据库
 """
 import os
 import hashlib
@@ -12,32 +12,15 @@ import logging
 import secrets
 import string
 import asyncio
-import pathlib
-from typing import List
-from contextlib import asynccontextmanager
+import shutil
 
 from fastapi import UploadFile
 import aiofiles
-from tortoise.transactions import in_transaction
 
-from faplus.media.models import SNRecord, FileRecord
-from faplus.utils import get_setting_with_default
-
-BASE_DIR = get_setting_with_default("BASE_DIR")
-MEDIA_ROOT = get_setting_with_default("FAP_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
-FAP_TEMP_DIR = get_setting_with_default("FAP_TEMP_DIR", os.path.join(BASE_DIR, "temp"))
-
-logger = logging.getLogger(__package__)
+from faplus.media.models import SNRecord
 
 
-@asynccontextmanager
-async def transaction_manager():
-    try:
-        async with in_transaction():
-            yield
-    except Exception as e:
-        logger.error("Error during transaction", exc_info=True)
-        raise
+logger = logging.getLogger("media")
 
 
 async def generate_sn(len: int = 18, retry: int = 0) -> str:
@@ -64,128 +47,178 @@ async def generate_sn(len: int = 18, retry: int = 0) -> str:
         await SNRecord.create(sn=sn)
 
     return sn
+        
 
+class FileSaveManager:
+    def __init__(self):
+        self.save_files = []
 
-async def save_upload_file(
-    file: UploadFile, save_path: str, file_name: str = None
-) -> tuple[str, str]:
-    """保存上传的文件并生成哈希值作为文件名
+    async def __aenter__(self):
+        return self
 
-    :param file: 上传的文件
-    :param save_path: 保存地址
-    :param file_name: 文件名称（可选）
-    :return: 文件的hash和文件名
-    """
-    if not file:
-        return None
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            logger.error(
+                f"Failed to save files. Rolling back changes. Files=[{','.join(self.save_files)}]",
+                exc_info=True,
+            )
+            await self.rollback()
 
-    # 创建保存目录（如果不存在的话）
-    os.makedirs(save_path, exist_ok=True)
+    async def rollback(self):
+        tasks = []
+        for file in self.save_files:
+            tasks.append(self._remove_file(file))
+        await asyncio.gather(*tasks)
 
-    # 获取文件内容并计算哈希值
-    file_content = await file.read()
-    file_hash = hashlib.sha256(file_content).hexdigest()
-
-    # 根据是否提供自定义文件名来生成新的文件名
-    final_file_name = file_name if file_name else file.filename
-    hash_name = f"{file_hash}_{final_file_name}"
-
-    file_path = os.path.join(save_path, hash_name)
-
-    # 如果文件已经存在，跳过保存
-    if os.path.exists(file_path):
-        return (file_hash, final_file_name)
-
-    # 保存文件
-    async with aiofiles.open(file_path, "wb") as f:
-        await f.write(file_content)
-
-    # 重新设置文件指针到开头
-    await file.seek(0)
-
-    return (file_hash, final_file_name)
-
-
-async def delete_file(file_path: str) -> bool:
-    """异步删除文件
-
-    :param file_path: 文件路径
-    :return: 是否删除成功
-    """
-    if not os.path.exists(file_path):
-        logging.info(f"File {file_path} does not exist, skipping deletion.")
-        return False
-
-    try:
-        await asyncio.to_thread(os.remove, file_path)
-        logging.info(f"File {file_path} deleted successfully.")
-        return True
-    except OSError as e:
-        logging.error(f"Failed to delete file {file_path}: {e}")
-        return False
-
-async def delete_by_sns(sns: List[str]):
-    files = await FileRecord.filter(sn__in=sns)
-    if not files:
-        return
-
-    media_root = pathlib.Path(MEDIA_ROOT)
-    temp_dir = pathlib.Path(FAP_TEMP_DIR)
-
-    file_paths = []
-    temp_files = []
-
-    # 验证并准备路径
-    for file in files:
-        file_path = (media_root / file.file_path / file.original_name).resolve()
-        temp_file_path = (temp_dir / file.file_path / file.original_name).resolve()
-
-        if not file_path.is_relative_to(media_root) or not temp_file_path.is_relative_to(temp_dir):
-            raise ValueError("Invalid file path")
-
-        file_paths.append(file_path)
-        temp_files.append(temp_file_path)
-
-    # 备份文件
-    for file_path, temp_file_path in zip(file_paths, temp_files):
+    async def _remove_file(self, file: str):
         try:
-            temp_file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.rename(temp_file_path)
+            await asyncio.to_thread(os.remove, file)
+            logger.debug(f"Rolled back file successfully: {file}")
         except Exception as e:
-            print(f"Failed to backup file {file_path}: {e}")
+            logger.error(f"Error rolling back file: {file}.", exc_info=True)
+
+    async def save(self, file: UploadFile, target_dir: str) -> str:
+        if not file:
+            raise ValueError("No file provided")
+
+        # 判断目标文件夹是否存在，不存在则创建
+        os.makedirs(target_dir, exist_ok=True)
+
+        # 计算Hash，判断文件是否重复
+        content = await file.read()
+        file_hash = hashlib.sha256(content).hexdigest()
+        target_path = os.path.join(target_dir, file_hash)
+
+        if not os.path.exists(target_path):
+            # 保存文件
+            async with aiofiles.open(target_path, "wb") as f:
+                await f.write(content)
+            self.save_files.append(target_path)
+            logger.info(f"File saved successfully: {target_path}")
+        else:
+            logger.info(f"File already exists: {target_path}")
+
+        # 重置指针
+        await file.seek(0)
+
+        return file_hash
+
+
+class FileDeleteManager:
+    def __init__(self, backup_dir: str):
+        """
+        初始化文件删除管理器。
+
+        :param backup_dir: 用于存储备份文件的目录路径
+        """
+        self.deleted_files = []  # 记录原始文件路径和对应的备份文件路径
+        self.backup_dir = os.path.abspath(backup_dir)  # 备份文件存储目录
+        os.makedirs(self.backup_dir, exist_ok=True)  # 确保备份目录存在
+
+    async def __aenter__(self):
+        self.deleted_files = []
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            logger.error(
+                f"发生异常，开始回滚已删除的文件: {self.deleted_files}",
+                exc_info=True,
+            )
+            await self.rollback()
+
+    async def delete(self, file_path: str):
+        """
+        删除文件并备份以便回滚。
+
+        :param file_path: 需要删除的文件路径
+        """
+        if not os.path.exists(file_path):
+            logger.warning(f"文件不存在，跳过删除: {file_path}")
+            return
+
+        try:
+            # 备份文件到备份目录
+            backup_path = os.path.join(self.backup_dir, os.path.basename(file_path))
+            await asyncio.to_thread(shutil.copy, file_path, backup_path)
+
+            # 删除文件
+            await asyncio.to_thread(os.remove, file_path)
+            self.deleted_files.append((file_path, backup_path))
+            logger.info(f"文件已删除并备份: {file_path} -> {backup_path}")
+        except Exception as e:
+            logger.error(f"删除文件失败: {file_path}. 错误: {e}", exc_info=True)
             raise
 
-    try:
-        async with transaction_manager():
-            await FileRecord.filter(sn__in=sns).delete()  # 删除数据库记录
-            
-            for file_path in temp_files:  # 删除备份文件
-                try:
-                    await delete_file(file_path)
-                except Exception as e:
-                    print(f"Failed to delete file {file_path}: {e}")
-                    raise
-    finally:
-        # 回滚备份文件
-        for file_path, temp_file_path in zip(file_paths, temp_files):
-            if temp_file_path.exists():
-                try:
-                    file_path.parent.mkdir(parents=True, exist_ok=True)
-                    temp_file_path.rename(file_path)
-                except Exception as e:
-                    print(f"Failed to rollback file {temp_file_path}: {e}")
-                finally:
-                    temp_file_path.unlink(missing_ok=True)
+    async def rollback(self):
+        """
+        恢复所有已删除并备份的文件。
+        """
+        remaining_backups = []  # 记录未回滚成功的备份文件
+        for file_path, backup_path in self.deleted_files:
+            try:
+                await self._restore_file(file_path, backup_path)
+                # 回滚成功后删除备份文件
+                await self._delete_backup_file(backup_path)
+            except Exception as e:
+                logger.error(f"回滚文件失败: {file_path}. 错误: {e}", exc_info=True)
+                remaining_backups.append((file_path, backup_path))
+
+        if remaining_backups:
+            logger.warning("以下文件未能回滚，请管理员手动检查备份文件:")
+            for file_path, backup_path in remaining_backups:
+                logger.warning(f"原路径: {file_path}, 备份路径: {backup_path}")
+
+    async def _restore_file(self, file_path: str, backup_path: str):
+        """
+        从备份目录恢复文件。
+
+        :param file_path: 原始文件路径
+        :param backup_path: 备份文件路径
+        """
+        if not os.path.exists(backup_path):
+            raise FileNotFoundError(f"备份文件不存在: {backup_path}")
+        try:
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+            await asyncio.to_thread(shutil.copy, backup_path, file_path)
+            logger.info(f"文件已恢复: {file_path}")
+        except Exception as e:
+            logger.error(f"恢复文件失败: {file_path}. 错误: {e}", exc_info=True)
+            raise
+
+    async def _delete_backup_file(self, backup_path: str):
+        """
+        删除单个备份文件。
+
+        :param backup_path: 备份文件路径
+        """
+        try:
+            if os.path.exists(backup_path):
+                await asyncio.to_thread(os.remove, backup_path)
+                logger.info(f"备份文件已删除: {backup_path}")
+        except Exception as e:
+            logger.error(f"删除备份文件失败: {backup_path}. 错误: {e}", exc_info=True)
 
 
-async def get_file(file_path: str, file_name: str):
-    """获取文件
-    :param file_path: 文件路径
-    :param file_name: 文件名称
-    :return: 文件内容
+async def get_file(dir_path: str, file_hash: str):
     """
-    fpath = os.path.join(file_path, file_name)
-    if not os.path.exists(fpath):
-        return
-    async with aiofiles.open(fpath, "rb") as f:
-        return await f.read()
+    获取文件内容。
+
+    :param dir_path: 文件所在目录路径
+    :param file_hash: 文件的哈希值，用作文件名
+    :return: 文件内容（字节串）或 None 如果文件不存在
+    """
+    file_path = os.path.join(dir_path, file_hash)
+
+    # 检查文件是否存在
+    if not os.path.exists(file_path):
+        return None
+
+    # 读取文件内容
+    try:
+        async with aiofiles.open(file_path, "rb") as f:  # 以二进制模式读取
+            return await f.read()
+    except Exception as e:
+        # 捕获并记录读取文件时的异常
+        logger.error(f"读取文件失败: {file_path}, 错误: {e}", exc_info=True)
+        return None

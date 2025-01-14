@@ -13,7 +13,7 @@ import logging
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus.utils import get_setting_with_default, Response
+from faplus.utils import get_setting_with_default, Response as ApiResponse, StatusCodeEnum
 from faplus.media import MediaManager
 
 logger = logging.getLogger(__package__)
@@ -27,15 +27,22 @@ class FileDownloadMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         # 获取url
         path = request.url.path
+        print(path)
         if not path.startswith(MEDIA_URL):
             return await call_next(request)
 
         # 获取文件的sn（url的最后一截）
         sn = path.split("/")[-1]
 
-        file, file_name, file_type = await MediaManager.download(sn)
-
+        rst = await MediaManager.download([sn])
+        if not rst:
+            return Response(
+                ApiResponse.fail(StatusCodeEnum.请求不存在.value, StatusCodeEnum.请求不存在.name).json(),
+                headers={"Content-Type": "application/json"},
+            )
+        
+        file, file_name, file_type = rst[0]
         if file_type.startswith("image"):
-            return Response.img(file, file_type)
+            return ApiResponse.img(file, file_type)
         else:
-            return Response.file(file, file_name)
+            return ApiResponse.download(file, file_name)

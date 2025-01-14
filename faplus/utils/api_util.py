@@ -1,5 +1,6 @@
 import io
 import urllib.parse
+import uuid
 
 from fastapi.responses import StreamingResponse, Response as FAResponse
 from faplus.utils.config_util import StatusCodeEnum
@@ -25,7 +26,8 @@ class Response(object):
     def download(file: bytes, file_name: str = None):
         # 文件名可能是非ASCII字符，所以我们需要正确地编码它。
         encoded_filename = urllib.parse.quote(file_name)
-        content_disposition = f"attachment; filename*=UTF-8''{encoded_filename}"
+         # 设置 Content-Disposition 头
+        content_disposition = f"attachment; filename={encoded_filename}"
 
         return StreamingResponse(
             io.BytesIO(file),

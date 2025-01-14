@@ -29,13 +29,16 @@ class FileRecord(Model):
     original_name = fields.CharField(
         max_length=255, description="文件的真实名称，用户上传的文件名"
     )
+    save_name = fields.CharField(
+        max_length=255, null=True, description="文件的保存名称"
+    )
     sn = fields.CharField(unique=True, max_length=64, description="文件的唯一标识")
     file_hash = fields.CharField(
         max_length=64, description="文件的哈希值（SHA256），用于唯一标识文件"
     )
     file_path = fields.CharField(max_length=512, description="文件存储在服务器上的路径")
     file_type = fields.CharField(
-        max_length=50,
+        max_length=255,
         description="文件类型（如：image/jpeg，application/pdf 等），根据 MIME 类型",
     )
     source = fields.CharField(
@@ -56,4 +59,4 @@ class FileRecord(Model):
         ]
 
     def __str__(self):
-        return f"FileRecord(id={self.id}, original_name={self.original_name}, file_hash={self.file_hash})"
+        return f"FileRecord(id={self.id}, sn={self.sn}, file_hash={self.file_hash}, file_path={self.file_path})"

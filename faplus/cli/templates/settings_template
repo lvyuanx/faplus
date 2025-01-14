@@ -1,11 +1,10 @@
 import os
 from pathlib import Path
 import config as cfg
-from faplus import const as fap_const
 
-cfg_dict = cfg.__dict__
+
 def config(key: str, default: str = None):
-    return cfg_dict.get(key, default)
+    return getattr(cfg, key, default)
 
 
 ENV = "dev"
@@ -23,11 +22,9 @@ FAP_MEDIA_URL = "/media"
 OPEN_VERSION = [""]  # 开启的版本， "": 默认版本
 
 FAP_MIDDLEWARE_CLASSES = [
-    "faplus.middlewares.exception_to_json_response_middleware.ExceptionToJsonResponseMiddleware",  # 异常转json
     "faplus.middlewares.error_status_code_middleware.ErrorStatusCodeMiddleware",  # 异常码中间件
     "faplus.media.middlewares.file_download_middleware.FileDownloadMiddleware",  # 文件下载中间件
     "faplus.middlewares.jwt_middleware.JwtMiddleware",  # jwt中间件
-    "faplus.middlewares.docs_login_middleware.DocsLoginMiddleware",  # 在线文档登录拦截器
     "faplus.middlewares.static_middleware.StaticMiddleware",  # 静态资源中间件
     "faplus.middlewares.whitelist_middleware.WhitelistMiddleware",  # 白名单中间件
     "faplus.middlewares.logging_middleware.LoggingMiddleware",  # 日志中间件
@@ -37,8 +34,6 @@ FAP_STARTUP_FUNCS = [
     "faplus.startups.cache_ping_startup.cache_ping_event",  # 缓存ping
     "faplus.startups.tortoise_orm_startup.tortoise_orm_init_event",  # 数据库ORM初始化
     "faplus.startups.content_type_startup.content_type_register_event",  # 注册模型
-    "user_manage.startups.business_data_init_startup.business_role_init_event", # 初始化业务角色权限
-    "user_manage.startups.business_data_init_startup.business_superuser_init_event", # 初始化超级管理员
     "faplus.startups.run_info_startup.run_info_event",  # 开机信息
 ]  # 开机自启
 
@@ -54,9 +49,7 @@ if DEBUG:
         "/debug/user/create",
     ]
 
-PROJECT_APP_PACKAGES = [
-    "user_manage"
-]  # 项目APP包
+PROJECT_APP_PACKAGES = []  # 项目APP包
 
 FAP_INSERTAPPS = [
     "faplus",
@@ -136,6 +129,3 @@ FAP_CACHE_CONFIG = {
         },
     }
 }
-
-SUPERUSERS = config("SUPERUSERS", [])  # 超级管理员ids
-FAP_TOKEN_SOURCE = config("FAP_TOKEN_SOURCE", fap_const.TokenSourceEnum.Cookie) # token来源

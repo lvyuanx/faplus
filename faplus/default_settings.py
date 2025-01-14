@@ -6,11 +6,12 @@ Author: lvyuanxiang
 Date: 2024/11/19 17:23:40
 Description: FAP用到的所有默认配置
 """
+import os
 from pathlib import Path
 from . import const
 
 DEBUG = True
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = None
 
 # 在线文档swagger地址
 FAP_DOCS_URL = "/docs"
@@ -25,7 +26,7 @@ FAP_DOC_IS_LOCAL_STATIC = False
 FAP_STATIC_URL = "/static"
 
 # 静态文件目录
-FAP_STATIC_NAME = "static"
+FAP_STATIC_NAME = os.path.join(Path(__file__).resolve().parent, "static") 
 
 # 文档标题
 FAP_TITLE = "FAP ONLINE DOCS"
@@ -143,3 +144,5 @@ FAP_CACHE_DEFAULT_EXPIRE = 60 * 60 * 24 * 7  # 默认缓存过期时间
 # 媒体
 FAP_MEDIA_DIR = None
 FAP_MEDIA_URL = "/media"
+
+FAP_TEMP_DIR = None

@@ -18,7 +18,7 @@ from faplus.view import (
     File,
     Response,
 )
-from faplus.media.media_manager import MediaManager
+from faplus.media.media_manager import MediaManager, media_upload_opens
 
 logger = logging.getLogger(__package__)
 
@@ -33,8 +33,9 @@ class View(PostView):
         tk: str = Header(None, description="登录token", alias=FAP_TOKEN_TAG),
         file: UploadFile = File(..., description="上传文件"),
     ):
-        sn = await MediaManager.upload(file)
-        if not sn:  # 上传失败
-            return View.make_code("00")
-        else:
-            return Response.ok(data=sn)
+        async with MediaManager(media_upload_opens) as manager:
+            sn = await manager.upload([file])
+            if not sn:  # 上传失败
+                return View.make_code("00")
+            else:
+                return Response.ok(data=sn[0])

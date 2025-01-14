@@ -37,8 +37,12 @@ class View(GetView):
         tk: str = Header(None, description="登录token", alias=FAP_TOKEN_TAG),
         sn: str = Path(..., description="文件sn码"),
     ):
-        file, _, file_type = await MediaManager.download(sn)
-        if not file:
+        rst = await MediaManager.download([sn])
+        if not rst:
             return View.make_code(StatusCodeEnum.请求不存在)
-
-        return Response.img(file, file_type)
+        file_byte, file_name, file_type = rst[0]
+        
+        if file_type.startswith("image"):
+            return Response.img(file_byte, file_type)
+        else:
+            return Response.download(file_byte, file_name)
