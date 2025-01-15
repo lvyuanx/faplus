@@ -146,3 +146,6 @@ FAP_MEDIA_DIR = None
 FAP_MEDIA_URL = "/media"
 
 FAP_TEMP_DIR = None
+
+FAP_GEST_USERS_LOGIN_URL = "/gest/login"
+FAP_GUEST_USERS = []

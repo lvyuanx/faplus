@@ -27,7 +27,6 @@ class FileDownloadMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         # 获取url
         path = request.url.path
-        print(path)
         if not path.startswith(MEDIA_URL):
             return await call_next(request)
 
