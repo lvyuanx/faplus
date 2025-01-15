@@ -9,11 +9,8 @@
 """
 
 import logging
-from typing import Any, Union, Callable, Dict
+from typing import Union, Callable, Dict
 import json
-from fastapi import responses
-
-from starlette.datastructures import MutableHeaders
 from fastapi import Request, Response
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -106,7 +103,6 @@ class GuestUserLoginMiddleware(BaseHTTPMiddleware):
         
         token = await token_util.create_token({"username": user.username, "is_gest": True})
         res = token_handle(request, token)
-        print(res)
         if not res:
             return Response(status_code=404)
         return res
