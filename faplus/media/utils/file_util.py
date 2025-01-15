@@ -86,8 +86,9 @@ class FileSaveManager:
 
         # 计算Hash，判断文件是否重复
         content = await file.read()
+        original_name = file.filename
         file_hash = hashlib.sha256(content).hexdigest()
-        target_path = os.path.join(target_dir, file_hash)
+        target_path = os.path.join(target_dir, f"{file_hash}_{original_name}")
 
         if not os.path.exists(target_path):
             # 保存文件
@@ -200,15 +201,16 @@ class FileDeleteManager:
             logger.error(f"删除备份文件失败: {backup_path}. 错误: {e}", exc_info=True)
 
 
-async def get_file(dir_path: str, file_hash: str):
+async def get_file(dir_path: str, file_hash: str, original_name: str):
     """
     获取文件内容。
 
     :param dir_path: 文件所在目录路径
     :param file_hash: 文件的哈希值，用作文件名
+    :param original_name: 文件的原始名称
     :return: 文件内容（字节串）或 None 如果文件不存在
     """
-    file_path = os.path.join(dir_path, file_hash)
+    file_path = os.path.join(dir_path, f"{file_hash}_{original_name}")
 
     # 检查文件是否存在
     if not os.path.exists(file_path):

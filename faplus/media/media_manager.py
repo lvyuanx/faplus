@@ -110,7 +110,7 @@ class MediaManager:
             return []
 
         file_manager = FileRecord.filter(sn__in=sn_lst)
-        file_data_lst = await file_manager.values("file_path", "file_hash", "sn")
+        file_data_lst = await file_manager.values("file_path", "file_hash", "sn", "original_name")
         sn_lst = []
 
         try:
@@ -119,7 +119,7 @@ class MediaManager:
             
             # 删除文件并回滚备份
             for file_data in file_data_lst:
-                await self.delete_manager.delete(os.path.join(file_data["file_path"], file_data["file_hash"]))
+                await self.delete_manager.delete(os.path.join(file_data["file_path"], file_data["file_hash"]), file_data["original_name"])
                 sn_lst.append(file_data["sn"])
 
         except Exception as e:
@@ -142,7 +142,7 @@ class MediaManager:
             file_type = file_record.file_type
 
             # 获取文件内容
-            file = await file_util.get_file(file_path, file_hash)
+            file = await file_util.get_file(file_path, file_hash, original_name)
             rst.append((file, save_name or original_name, file_type))
         
         return rst
