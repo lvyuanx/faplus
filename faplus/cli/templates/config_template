@@ -10,3 +10,15 @@ REDIS_HOST = "127.0.0.1"
 REDIS_PROT = 6379
 REDIS_DB = 0
 REDIS_PASSWORD = ""
+
+FAP_GUEST_USERS = [
+    GuestUser(
+        id=f"g{i}",
+        username=f"guest_{i}",
+        password="123456",
+        nickname=f"guest_{i}_nickname",
+        avatar="",
+        email="gest@email.gest",
+        mobile="17300000000"
+    ) for i in range(10)
+]

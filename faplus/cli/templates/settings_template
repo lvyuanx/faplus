@@ -22,9 +22,12 @@ FAP_MEDIA_URL = "/media"
 OPEN_VERSION = [""]  # 开启的版本， "": 默认版本
 
 FAP_MIDDLEWARE_CLASSES = [
+    "faplus.middlewares.exception_to_json_response_middleware.ExceptionToJsonResponseMiddleware",  # 异常码传json数据中间件
     "faplus.middlewares.error_status_code_middleware.ErrorStatusCodeMiddleware",  # 异常码中间件
     "faplus.media.middlewares.file_download_middleware.FileDownloadMiddleware",  # 文件下载中间件
     "faplus.middlewares.jwt_middleware.JwtMiddleware",  # jwt中间件
+    "faplus.middlewares.docs_login_middleware.DocsLoginMiddleware",  # 在线文档登录拦截器
+    "faplus.auth.middlewares.guest_user_login_middleware.GuestUserLoginMiddleware",  # 在线文档登录拦截器
     "faplus.middlewares.static_middleware.StaticMiddleware",  # 静态资源中间件
     "faplus.middlewares.whitelist_middleware.WhitelistMiddleware",  # 白名单中间件
     "faplus.middlewares.logging_middleware.LoggingMiddleware",  # 日志中间件
@@ -129,3 +132,5 @@ FAP_CACHE_CONFIG = {
         },
     }
 }
+
+FAP_GUEST_USERS = config("FAP_GUEST_USERS", [])
