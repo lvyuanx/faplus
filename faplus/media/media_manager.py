@@ -115,12 +115,18 @@ class MediaManager:
 
         try:
             # 删除文件记录
-            await file_manager.delete()
-            
-            # 删除文件并回滚备份
-            for file_data in file_data_lst:
-                await self.delete_manager.delete(os.path.join(file_data["file_path"], file_data["file_hash"]), file_data["original_name"])
-                sn_lst.append(file_data["sn"])
+            for item in file_data_lst:
+                file_path = item["file_path"]
+                file_hash = item["file_hash"]
+                original_name = item["original_name"]
+                sn = item["sn"]
+                manager = FileRecord.filter(file_path=file_path, file_hash=file_hash)
+                print("*"  *  100)
+                print(await manager.count())
+                if await manager.count() == 1: # 如果文件记录唯一，则删除文件
+                    await self.delete_manager.delete(file_path, file_hash, original_name)
+                await manager.filter(sn=sn).delete()
+                sn_lst.append(sn)
 
         except Exception as e:
             logger.error(f"File removal failed, rolling back: {e}", exc_info=True)

@@ -76,6 +76,15 @@ def load_logging_cfg():
                     "encoding": "utf-8",
                     "filters": ["aiomysql_filter"],
                 },
+                "media": {  # 记录项目日志
+                    "level": "DEBUG",
+                    "class": "faplus.logging.log_handler.MultiprocessTimeHandler",
+                    "file_path": log_dir,
+                    "suffix": "%Y-%m-%d-media",
+                    "formatter": "detailed",
+                    "backup_count": 30,
+                    "encoding": "utf-8",
+                },
                 "project": {  # 记录项目日志
                     "level": "DEBUG",
                     "class": "faplus.logging.log_handler.MultiprocessTimeHandler",
@@ -106,6 +115,11 @@ def load_logging_cfg():
             "loggers": {
                 "": {
                     "handlers": ["all", "console", "error", "project"],
+                    "level": log_level,
+                    "propagate": True,
+                },
+                "media": {
+                    "handlers": ["media"],
                     "level": log_level,
                     "propagate": True,
                 }

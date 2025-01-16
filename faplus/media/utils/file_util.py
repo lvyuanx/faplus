@@ -128,12 +128,14 @@ class FileDeleteManager:
             )
             await self.rollback()
 
-    async def delete(self, file_path: str):
+    async def delete(self, dir_path: str, file_hash: str, original_name: str):
         """
         删除文件并备份以便回滚。
 
         :param file_path: 需要删除的文件路径
         """
+        file_name = f"{file_hash}_{original_name}"
+        file_path = os.path.join(dir_path, file_name)
         if not os.path.exists(file_path):
             logger.warning(f"文件不存在，跳过删除: {file_path}")
             return
