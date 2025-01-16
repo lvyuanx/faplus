@@ -210,13 +210,14 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                 api_module.View.api_code = api_code
                 api_module.View.code_dict = code_dict
                 version_config = kwargs.get("version_config", None)
+                tags = kwargs.get("tags", [])
                 if version_config:
                     for k, v in version_config.items():  # k: version url v: 接口
                         if k not in OPEN_VERSION:
                             continue
                         api_cfg = {
                             "path": pre_url + k + aurl,
-                            "name": f"{aname}  {api_code}",
+                            "name": f"{aname}  {api_code} {'【DEBUG】' if 'DEBUG' in tags else ''}",
                             "response_model": view_endpoint.response_model,
                             "methods": view_endpoint.methods,
                             "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
@@ -226,13 +227,13 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                         api_group.add_api_route(
                             endpoint=getattr(view_endpoint, v),
                             **api_cfg,
-                            tags=[gtag] + kwargs.get("tags", []),
+                            tags=[gtag] + tags,
                         )
                 else:
                     # 未配置版本
                     api_cfg = {
                         "path": pre_url + aurl,
-                        "name": f"{aname}  {api_code}",
+                        "name": f"{aname}  {api_code} {'【DEBUG】' if 'DEBUG' in tags else ''}",
                         "response_model": view_endpoint.response_model,
                         "methods": view_endpoint.methods,
                         "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
@@ -242,7 +243,7 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                     api_group.add_api_route(
                         endpoint=view_endpoint.api,
                         **api_cfg,
-                        tags=[gtag] + kwargs.get("tags", []),
+                        tags=[gtag] + tags,
                     )
 
         app.include_router(router=api_group, prefix=gurl)
