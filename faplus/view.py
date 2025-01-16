@@ -13,6 +13,7 @@ from enum import Enum
 
 from fastapi import Header, Request, Body, Query, Path, Form, File, UploadFile
 from fastapi.responses import Response as FAResponse
+from tortoise.queryset import QuerySet
 
 from faplus.exceptions import FAPStatusCodeException
 from faplus.utils import get_setting_with_default, StatusCodeEnum
@@ -23,19 +24,6 @@ from .const import ViewStatusEnum
 FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
 
 logger = logging.getLogger(__package__)
-
-
-class ErrorInfo:
-    """错误信息"""
-
-    code: str = None
-    msg: str = None
-    msg_dict: dict = None
-
-    def __init__(self, code: str, msg: str = None, msg_dict: dict = None):
-        self.code = code
-        self.msg = msg
-        self.msg_dict = msg_dict
 
 
 class BaseView:
@@ -139,6 +127,28 @@ class BaseView:
             if name.startswith("api"):
                 wrapped_func = cls._api_wrapper(cls.finally_code)(func)
                 setattr(cls, name, wrapped_func)
+    
+    
+    @classmethod
+    async def paginate_query(cls, manager: QuerySet, curent_page: int = 0, page_size: int = 10) -> Dict:
+        """分压器查询
+
+        :param manager: 查询管理器
+        :param curent_page: 当前页页码, 从0开始
+        :param page_size: 当前页面大小
+        """
+        total = await manager.count()
+        offset = curent_page * page_size
+        data = await manager.offset(offset).limit(page_size).all()
+        
+        return {
+            "curent_page": curent_page,
+            "page_size": page_size,
+            "total": total,
+            "list": data
+        }
+        
+         
 
 
 class PostView(BaseView):

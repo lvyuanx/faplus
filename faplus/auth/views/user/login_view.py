@@ -17,12 +17,10 @@ from faplus.auth.schemas import LoginReqSchema, LoginResSchema, ResponseSchema
 from faplus.auth.utils import user_util
 from faplus.utils import token_util
 
-class R(ResponseSchema):
-    data: LoginResSchema
 
 class View(PostView):
 
-    response_model = R
+    response_model = ResponseSchema[LoginResSchema]
     finally_code = StatusCodeEnum.登录失败
     common_codes = [StatusCodeEnum.用户名或密码错误]
     view_status = ViewStatusEnum.success
