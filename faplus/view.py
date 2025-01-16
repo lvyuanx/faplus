@@ -17,7 +17,7 @@ from tortoise.queryset import QuerySet
 
 from faplus.exceptions import FAPStatusCodeException
 from faplus.utils import get_setting_with_default, StatusCodeEnum
-from faplus.schema import ResponseSchema
+from faplus.schema import ResponseSchema, ResponsePageSchema
 from faplus.utils.api_util import Response
 from .const import ViewStatusEnum
 
@@ -127,7 +127,16 @@ class BaseView:
             if name.startswith("api"):
                 wrapped_func = cls._api_wrapper(cls.finally_code)(func)
                 setattr(cls, name, wrapped_func)
-    
+
+
+class PostView(BaseView):
+    methods = ["POST"]
+
+
+class PageView(BaseView):
+    methods = ["POST"]
+
+    response_model = ResponsePageSchema
     
     @classmethod
     async def paginate_query(cls, manager: QuerySet, curent_page: int = 0, page_size: int = 10) -> Dict:
@@ -147,13 +156,6 @@ class BaseView:
             "total": total,
             "list": data
         }
-        
-         
-
-
-class PostView(BaseView):
-    methods = ["POST"]
-
 
 class GetView(BaseView):
     methods = ["GET"]
