@@ -8,7 +8,7 @@ Description: 登录视图
 """
 import logging
 from fastapi import Header, Request
-from faplus.view import PostView, FAP_TOKEN_TAG
+from faplus.view import PostView, FAP_TOKEN_TAG, ViewStatusEnum
 from faplus.exceptions.fap_execptions import FAPStatusCodeException
 from faplus.cache import cache
 
@@ -17,6 +17,8 @@ logger = logging.getLogger(__package__)
 class View(PostView):
 
     finally_code = "00", "测试错误"
+    view_status = ViewStatusEnum.develop
+    
     @staticmethod
     async def api(request: Request, authorization: str = Header(None, description="登录token", alias=FAP_TOKEN_TAG)):
         # i = 1 / 0

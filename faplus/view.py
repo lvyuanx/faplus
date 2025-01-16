@@ -8,15 +8,17 @@ Description: fastapi post 视图基类
 """
 import logging
 import functools
-from typing import Union, Type
+from typing import Dict, Union
+from enum import Enum
 
 from fastapi import Header, Request, Body, Query, Path, Form, File, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response as FAResponse
 
 from faplus.exceptions import FAPStatusCodeException
 from faplus.utils import get_setting_with_default, StatusCodeEnum
 from faplus.schema import ResponseSchema
 from faplus.utils.api_util import Response
+from .const import ViewStatusEnum
 
 FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
 
@@ -48,11 +50,12 @@ class BaseView:
     # 最终异常码，可以使用StatusCodeEnum枚举中定义的通用状态码枚举，或者接口异常状态码(<code>, <msg>)
     finally_code = None
     status_codes = []  # 接口异常状态码(<code>, <msg>)
+    view_status = ViewStatusEnum.define
 
     @classmethod
     def make_code(
-        cls, code: Union[str, StatusCodeEnum], msg_dict: dict = None
-    ) -> ErrorInfo:
+        cls, code: Union[str, Enum], msg_dict: Dict = None
+    ) -> ResponseSchema:
         if isinstance(code, str):
             code = f"{cls.api_code}{code}"
             if code not in cls.code_dict:
@@ -68,7 +71,10 @@ class BaseView:
             if code not in cls.code_dict:
                 raise ValueError(f"code {code} is not register")
 
-        return ErrorInfo(code, msg, msg_dict)
+        if msg_dict:
+            msg = msg.format(**msg_dict)
+        logger.warning(f"[make_code error]: {code}, msg: {msg}")
+        return Response.fail(code=code, msg=msg)
 
     @staticmethod
     async def api():
@@ -76,7 +82,7 @@ class BaseView:
         raise NotImplementedError("Subclasses should implement this method")
 
     @classmethod
-    def _api_wrapper(cls, code: StatusCodeEnum | tuple[str, str] = None):
+    def _api_wrapper(cls, code: Enum | tuple[str, str] = None):
         """api装饰器，能够帮助处理异常，以及返回值的处理"""
 
         def decorator(func):
@@ -85,23 +91,23 @@ class BaseView:
                 """wrapper"""
                 try:
                     result = await func(*args, **kwargs)
-                    if isinstance(result, ErrorInfo):  # 返回了异常影响
-                        msg_dict = result.msg_dict
-                        msg = result.msg
-                        if msg_dict:
-                            msg = msg.format(**msg_dict)
-                        result = Response.fail(code=result.code, msg=msg)
-                        logger.error(f"[ErrorInfo] result: {result}")
-                    else:  # 正常返回
-                        request = kwargs.get("request")
-                        if (
-                            isinstance(request, Request)
-                            and request.headers.get("Content-Type")
-                            == "application/json"
-                        ):
-                            result = Response.ok(data=result)
-                            logger.debug(f"result: {result}")
-                    return result
+
+                    # region ******************** 如果返回的是ResponseSchema直接返回 start ******************** #
+                    if isinstance(result, ResponseSchema): 
+                        logger.debug(f"result: {result}")
+                        return result
+                    # endregion ****************** 如果返回的是ResponseSchema直接返回 end ********************* #
+
+                    # region ******************** 如果返回的是原生Response也直接返回 start ******************** #
+                    if isinstance(result, FAResponse):
+                        logger.debug(f"result: {result}")
+                        return result
+                    # endregion ****************** 如果返回的是原生Response也直接返回 end ********************* #
+                    
+                    # region ******************** 其他类型当OK处理 start ******************** #
+                    return Response.ok(data=result)
+                    # endregion ****************** 其他类型OK处理 end ********************* #
+                    
                 except FAPStatusCodeException as e:  # 通过异常类终止程序
                     result = Response.fail(code=e.code, msg=e.msg)
                     logger.error(f"[FAPStatusCodeException] result: {result}")
@@ -113,8 +119,7 @@ class BaseView:
                     if isinstance(code, StatusCodeEnum):
                         result = Response.fail(code=code.value, msg=code.name)
                     elif isinstance(code, tuple):
-                        error_info = cls.make_code(code=code[0])
-                        result = Response.fail(code=error_info.code, msg=error_info.msg)
+                        result = cls.make_code(code=code[0])
                     else:
                         raise ValueError(
                             "code must be StatusCodeEnum or tuple(str, str)"

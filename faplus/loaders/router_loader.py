@@ -199,6 +199,7 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                 common_codes = view_endpoint.common_codes
                 finally_code = view_endpoint.finally_code
                 response_model = view_endpoint.response_model
+                view_status = view_endpoint.view_status
                 api_code = str(gid) + str(aid)
                 responses, code_dict = generate_responses(
                     api_code=api_code,
@@ -217,7 +218,7 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                             continue
                         api_cfg = {
                             "path": pre_url + k + aurl,
-                            "name": f"{aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
+                            "name": f"{view_status} {aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
                             "response_model": view_endpoint.response_model,
                             "methods": view_endpoint.methods,
                             "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
@@ -233,7 +234,7 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                     # 未配置版本
                     api_cfg = {
                         "path": pre_url + aurl,
-                        "name": f"{aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
+                        "name": f"{view_status} {aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
                         "response_model": view_endpoint.response_model,
                         "methods": view_endpoint.methods,
                         "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",

@@ -10,13 +10,14 @@ from fastapi import Query
 
 from faplus.auth.encrypt.rsa import encrypt
 from faplus.utils import StatusCodeEnum
-from faplus.view import PostView
+from faplus.view import PostView, ViewStatusEnum
 
 
 class View(PostView):
 
     finally_code = StatusCodeEnum.RSA加密失败
-
+    view_status = ViewStatusEnum.success
+    
     @staticmethod
     async def api(
         msg: str = Query(..., description="待加密数据"),

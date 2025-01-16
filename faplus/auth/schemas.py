@@ -24,13 +24,9 @@ class LoginReqSchema(BaseModel):
     password: str = Field(description="密码")
 
 
-class _LoginResSchema(BaseModel):
+class LoginResSchema(BaseModel):
     """登录响应参数"""
     token: str = Field(description="token")
-
-
-class LoginResSchema(ResponseSchema):
-    data: _LoginResSchema | None
 
 
 class CreateUserReqSchema(BaseModel):

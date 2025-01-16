@@ -20,6 +20,7 @@ from faplus.view import (
     Path,
     StatusCodeEnum,
     Response,
+    ViewStatusEnum
 )
 from faplus.media.media_manager import MediaManager
 
@@ -30,6 +31,7 @@ class View(GetView):
 
     finally_code = ("00", "文件下载发生异常")
     common_codes = [StatusCodeEnum.请求不存在]
+    view_status = ViewStatusEnum.success
 
     @staticmethod
     async def api(

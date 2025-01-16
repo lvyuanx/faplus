@@ -17,6 +17,7 @@ from faplus.view import (
     UploadFile,
     File,
     Response,
+    ViewStatusEnum
 )
 from faplus.media.media_manager import MediaManager, media_upload_opens
 
@@ -26,6 +27,7 @@ logger = logging.getLogger(__package__)
 class View(PostView):
 
     finally_code = ("00", "文件上传发生异常")
+    view_status = ViewStatusEnum.success
 
     @staticmethod
     async def api(

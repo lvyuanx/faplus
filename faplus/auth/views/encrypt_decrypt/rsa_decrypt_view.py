@@ -10,12 +10,13 @@ from fastapi import Query, Request
 
 from faplus.auth.encrypt.rsa import decrypt
 from faplus.utils import StatusCodeEnum
-from faplus.view import PostView
+from faplus.view import PostView, ViewStatusEnum
 
 
 class View(PostView):
 
     finally_code = StatusCodeEnum.RSA解密失败
+    view_status = ViewStatusEnum.success
 
     @staticmethod
     async def api(

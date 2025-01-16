@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 from . import const
 
+ViewStatusEnum = const.ViewStatusEnum
+
 DEBUG = True
 BASE_DIR = None
 
@@ -32,7 +34,17 @@ FAP_STATIC_NAME = os.path.join(Path(__file__).resolve().parent, "static")
 FAP_TITLE = "FAP ONLINE DOCS"
 
 # 文档说明
-FAP_DESCRIPTION = ""
+FAP_DESCRIPTION = f"""
+## 接口文档说明
+
+### 接口状态：
+* {ViewStatusEnum.define}: 表示接口仅仅定义，还未实现任何功能。 
+* {ViewStatusEnum.develop}: 表示接口开发中。
+* {ViewStatusEnum.test}: 表示接口开发完成，正在测试。
+* {ViewStatusEnum.success}: 表示接口已经实现，并且已经测试通过。
+
+**注意：如果文档标题中含有`🐞`表示该接口仅仅在开发环境中生效，生产环境无法使用**
+"""
 
 # 文档版本
 FAP_VERSION = "0.0.1"

@@ -9,7 +9,7 @@ Description: 开发环境创建用户
 from fastapi import Body, Request
 
 from faplus.utils import StatusCodeEnum
-from faplus.view import PostView
+from faplus.view import PostView, ViewStatusEnum
 from faplus.auth.schemas import CreateUserReqSchema
 from faplus.auth.utils import user_util
 
@@ -17,6 +17,7 @@ from faplus.auth.utils import user_util
 class View(PostView):
 
     finally_code = StatusCodeEnum.用户创建失败
+    view_status = ViewStatusEnum.success
 
     @staticmethod
     async def api(
