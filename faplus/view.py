@@ -8,7 +8,7 @@ Description: fastapi post 视图基类
 """
 import logging
 import functools
-from typing import Dict, Union
+from typing import Dict, Union, Callable
 from enum import Enum
 
 from fastapi import Header, Request, Body, Query, Path, Form, File, UploadFile
@@ -132,29 +132,40 @@ class BaseView:
 class PostView(BaseView):
     methods = ["POST"]
 
-
 class PageView(BaseView):
     methods = ["POST"]
 
     response_model = ResponsePageSchema
     
     @classmethod
-    async def paginate_query(cls, manager: QuerySet, curent_page: int = 0, page_size: int = 10) -> Dict:
+    async def paginate_query(cls, manager: QuerySet, curent_page: int = 0, page_size: int = 10, values: list[str] = None, convert = None) -> Dict:
         """分压器查询
 
         :param manager: 查询管理器
         :param curent_page: 当前页页码, 从0开始
         :param page_size: 当前页面大小
+        :param values: 需要返回的字段列表
+        :param convert: 返回数据转换函数
+        :return: 返回分页数据
         """
         total = await manager.count()
         offset = curent_page * page_size
-        data = await manager.offset(offset).limit(page_size).all()
+        manager = manager.offset(offset).limit(page_size)
+        if values:
+            manager = manager.values(*values)
+        else:
+            manager = manager.all()
+        
+        data = await manager
+
+        if convert:
+            data = [convert(item) for item in data]
         
         return {
             "curent_page": curent_page,
             "page_size": page_size,
             "total": total,
-            "list": data
+            "data": data
         }
 
 class GetView(BaseView):
