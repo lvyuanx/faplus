@@ -217,7 +217,7 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                             continue
                         api_cfg = {
                             "path": pre_url + k + aurl,
-                            "name": f"{aname}  {api_code} {'【DEBUG】' if 'DEBUG' in tags else ''}",
+                            "name": f"{aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
                             "response_model": view_endpoint.response_model,
                             "methods": view_endpoint.methods,
                             "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
@@ -233,7 +233,7 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                     # 未配置版本
                     api_cfg = {
                         "path": pre_url + aurl,
-                        "name": f"{aname}  {api_code} {'【DEBUG】' if 'DEBUG' in tags else ''}",
+                        "name": f"{aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
                         "response_model": view_endpoint.response_model,
                         "methods": view_endpoint.methods,
                         "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
