@@ -50,7 +50,9 @@ FAP_DESCRIPTION = f"""
 FAP_VERSION = "0.0.1"
 
 # 开启的版本
-OPEN_VERSION = [""]
+# OPEN_VERSION = [""]
+FAP_VERSION_CONFIG = {}  # 版本配置 key: 版本标记，为@verion(<版本标记>)中的值，value：版本的根路由
+FAP_OPEN_DFTDAULT_VERSION = True
 
 # 联系方式
 FAP_CONTACT = {}

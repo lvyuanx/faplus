@@ -19,8 +19,6 @@ FAP_SECRET_KEY = "urTlH17dYxLPE_NhF9ENl-yWIrkA8oHNAMtfLJ1N7pA"
 FAP_MEDIA_ROOT = os.path.join(BASE_DIR.parent, "media")
 FAP_MEDIA_URL = "/media"
 
-OPEN_VERSION = [""]  # 开启的版本， "": 默认版本
-
 FAP_MIDDLEWARE_CLASSES = [
     "faplus.middlewares.exception_to_json_response_middleware.ExceptionToJsonResponseMiddleware",  # 异常码传json数据中间件
     "faplus.middlewares.error_status_code_middleware.ErrorStatusCodeMiddleware",  # 异常码中间件

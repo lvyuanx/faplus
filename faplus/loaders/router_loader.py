@@ -8,7 +8,10 @@ Description: 加载路由
 """
 from enum import Enum
 import importlib
+import inspect
 import logging
+from os import name
+from re import A
 from types import ModuleType
 from typing import Union
 import uuid
@@ -41,7 +44,8 @@ FAP_API_CODE_NUM = get_setting_with_default("FAP_API_CODE_NUM")
 FAP_API_EXAMPLE_ADAPTER = get_setting_with_default("FAP_API_EXAMPLE_ADAPTER")
 FAP_INSERTAPPS = get_setting_with_default("FAP_INSERTAPPS")
 DEBUG = get_setting_with_default("DEBUG")
-OPEN_VERSION = get_setting_with_default("OPEN_VERSION")
+VERSION_CONFIG = get_setting_with_default("FAP_VERSION_CONFIG")
+OPEN_DFTDAULT_VERSION = get_setting_with_default("FAP_OPEN_DFTDAULT_VERSION")
 
 
 logger = logging.getLogger(__package__)
@@ -177,23 +181,39 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
     # 初始化app
     app = init_app()
 
+    for version_tag in VERSION_CONFIG:
+        assert version_tag != "default" and version_tag != "debug", "version tag not allowed to use default or debug"
+
+    api_group_dict = {} # key: version_tag, value: APIRouter(), APIRouter()
+    for version_tag in VERSION_CONFIG.keys():
+        api_group_dict[version_tag] = (APIRouter(), APIRouter())
+    
+    if OPEN_DFTDAULT_VERSION:
+        api_group_dict["default"] = (APIRouter(), APIRouter())
+    
+    
     # 遍历路由组
     for gid, gurl, groups, gtag in api_cfg:
-        api_group = APIRouter()
+        
+        # 遍历视图配置
         for pre_url, api_cfgs in groups.items():
 
             for api_cfg in api_cfgs:
+                
                 if len(api_cfg) == 4:
                     aid, aurl, amodule_or_str, aname = api_cfg
                     kwargs = {}
                 else:
                     aid, aurl, amodule_or_str, aname, kwargs = api_cfg
+
                 # 获取接口模块
                 if isinstance(amodule_or_str, str):
                     api_module = importlib.import_module(amodule_or_str)
                 else:
                     api_module = amodule_or_str
+
                 check_app(api_module)
+
                 view_endpoint = api_module.View  # 视图函数
                 status_codes = view_endpoint.status_codes
                 common_codes = view_endpoint.common_codes
@@ -201,6 +221,8 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                 response_model = view_endpoint.response_model
                 view_status = view_endpoint.view_status
                 api_code = str(gid) + str(aid)
+                tags = kwargs.get("tags", [])
+
                 responses, code_dict = generate_responses(
                     api_code=api_code,
                     status_codes=status_codes,
@@ -210,43 +232,51 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                 )
                 api_module.View.api_code = api_code
                 api_module.View.code_dict = code_dict
-                version_config = kwargs.get("version_config", None)
-                tags = kwargs.get("tags", [])
-                if version_config:
-                    for k, v in version_config.items():  # k: version url v: 接口
-                        if k not in OPEN_VERSION:
+                
+                # region ******************** 遍历View中的所有方法 start ******************** #
+                for name, attr in inspect.getmembers(view_endpoint, predicate=inspect.isfunction):
+                    if name == "api" or hasattr(attr, "version_tag"):
+                        
+                        version_tag = getattr(attr, "version_tag", "default")
+                        if version_tag not in VERSION_CONFIG.keys() and version_tag != "default":
                             continue
+                        
+                        is_debug_api = "DEBUG" in tags
+                        # 视图配置
                         api_cfg = {
-                            "path": pre_url + k + aurl,
-                            "name": f"{view_status} {aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
+                            "path": gurl + pre_url + aurl,
+                            "name": f"{view_status} {aname}  {api_code} {'🐞' if is_debug_api else ''}",
                             "response_model": view_endpoint.response_model,
                             "methods": view_endpoint.methods,
                             "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
                             "responses": responses,
                         }
-                        # 动态添加 API 路由，直接使用子类的 `api` 方法
-                        api_group.add_api_route(
-                            endpoint=getattr(view_endpoint, v),
+                        
+                        api_tags = [gtag] + tags
+                        print(gurl + pre_url + aurl, version_tag == "default")
+                        if version_tag == "default":
+                            group_router, debug_router = api_group_dict["default"]
+                        else:
+                            api_tags.append(version_tag)
+                            group_router, debug_router = api_group_dict[version_tag]
+                        
+                        router = group_router
+                        if is_debug_api:
+                            router = debug_router
+                            
+                        router.add_api_route(
+                            endpoint=attr,
                             **api_cfg,
-                            tags=[gtag] + tags,
+                            tags=api_tags,
                         )
-                else:
-                    # 未配置版本
-                    api_cfg = {
-                        "path": pre_url + aurl,
-                        "name": f"{view_status} {aname}  {api_code} {'🐞' if 'DEBUG' in tags else ''}",
-                        "response_model": view_endpoint.response_model,
-                        "methods": view_endpoint.methods,
-                        "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
-                        "responses": responses,
-                    }
-                    # 动态添加 API 路由，直接使用子类的 `api` 方法
-                    api_group.add_api_route(
-                        endpoint=view_endpoint.api,
-                        **api_cfg,
-                        tags=[gtag] + tags,
-                    )
+                # endregion ****************** 遍历View中的所有方法 end ********************* #    
 
-        app.include_router(router=api_group, prefix=gurl)
-
+    for version_tag, (group_router, debug_router) in api_group_dict.items():
+        if version_tag == "default":
+            app.include_router(router=group_router)
+            app.include_router(router=debug_router, prefix="/debug")
+        else:
+            version_url = VERSION_CONFIG[version_tag]
+            app.include_router(router=group_router, prefix=version_url)
+            app.include_router(router=debug_router, prefix=f"/debug{version_url}")
     return app

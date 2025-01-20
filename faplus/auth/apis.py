@@ -26,13 +26,7 @@ if DEBUG:
 
     apis["/user"] = [
         ("07", "/create", create_user_view, "创建用户", {"tags": ["DEBUG"]}),
-        (
-            "08",
-            "/test",
-            test_view,
-            "测试",
-            {"tags": ["DEBUG"], "version_config": {"": "api", "/v1": "api_v1"}},
-        ),
+        ("08", "/test", test_view, "测试", {"tags": ["DEBUG"]}),
     ]
 
     apis["/crypto/rsa"] = [

@@ -8,7 +8,7 @@ Description: 登录视图
 """
 import logging
 from fastapi import Header, Request
-from faplus.view import PostView, FAP_TOKEN_TAG, ViewStatusEnum
+from faplus.view import PostView, FAP_TOKEN_TAG, ViewStatusEnum, version
 from faplus.exceptions.fap_execptions import FAPStatusCodeException
 from faplus.cache import cache
 
@@ -33,5 +33,9 @@ class View(PostView):
     
     
     @staticmethod
+    @version("1.0.1")
     async def api_v1():
+        """
+        这是一个测试1.0.1版本的接口
+        """
         pass

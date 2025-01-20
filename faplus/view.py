@@ -25,6 +25,17 @@ FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
 
 logger = logging.getLogger(__package__)
 
+import functools
+
+def version(version_tag: str):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            return version_tag, func(*args, **kwargs)
+        wrapper.version_tag = version_tag # 设置版本号
+        return wrapper
+    return decorator
+
 
 class BaseView:
     """所有视图接口的基类"""
@@ -122,10 +133,9 @@ class BaseView:
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
 
-        # 所有api开头的方法，自动使用_api_wrapper
-        for name, func in cls.__dict__.items():
-            if name.startswith("api"):
-                wrapped_func = cls._api_wrapper(cls.finally_code)(func)
+        for name, attr in cls.__dict__.items():
+            if callable(attr) and (name == "api" or hasattr(attr, "version_tag")):
+                wrapped_func = cls._api_wrapper(cls.finally_code)(attr)
                 setattr(cls, name, wrapped_func)
 
 
