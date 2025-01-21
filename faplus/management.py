@@ -101,7 +101,7 @@ class Management:
             "port": int(port),
             "reload": self.command_args.reload,
             "workers": self.command_args.workers,
-            "log_level": "debug",
+            "log_level": "error",
         }
 
         os.environ.setdefault("UVICORN_KWARGS", json.dumps(uvicorn_kwargs))
