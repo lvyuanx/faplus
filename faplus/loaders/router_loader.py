@@ -10,8 +10,6 @@ from enum import Enum
 import importlib
 import inspect
 import logging
-from os import name
-from re import A
 from types import ModuleType
 from typing import Union
 import uuid
@@ -21,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic.main import BaseModel
 from faplus.utils import get_setting_with_default
 from faplus.utils import data_util
+from faplus.schema import ErrorResponseSchema
 from fastapi.openapi.docs import (
     get_redoc_html,
     get_swagger_ui_html,
@@ -238,6 +237,8 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                     if name == "api" or hasattr(attr, "version_tag"):
                         
                         version_tag = getattr(attr, "version_tag", "default")
+                        
+                        # 判断api的版本设置是否正确
                         if version_tag not in VERSION_CONFIG.keys() and version_tag != "default":
                             continue
                         
@@ -245,21 +246,21 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
                         # 视图配置
                         api_cfg = {
                             "path": gurl + pre_url + aurl,
-                            "name": f"{view_status} {aname}  {api_code} {'🐞' if is_debug_api else ''}",
-                            "response_model": view_endpoint.response_model,
+                            "name": f"{view_status} {aname}  {api_code} {'🐞' if is_debug_api else ''} \
+                                {'' if version_tag == 'default' else f'✨:{version_tag}'}",
+                            "response_model": Union[view_endpoint.response_model, ErrorResponseSchema],
                             "methods": view_endpoint.methods,
                             "operation_id": f"{api_code}_{api_module.__name__}_{uuid.uuid4().hex}",
                             "responses": responses,
                         }
                         
                         api_tags = [gtag] + tags
-                        print(gurl + pre_url + aurl, version_tag == "default")
                         if version_tag == "default":
                             group_router, debug_router = api_group_dict["default"]
                         else:
                             api_tags.append(version_tag)
                             group_router, debug_router = api_group_dict[version_tag]
-                        
+                            
                         router = group_router
                         if is_debug_api:
                             router = debug_router
@@ -278,5 +279,5 @@ def loader(app: Union[FastAPI, None] = None) -> Union[FastAPI, None]:
         else:
             version_url = VERSION_CONFIG[version_tag]
             app.include_router(router=group_router, prefix=version_url)
-            app.include_router(router=debug_router, prefix=f"/debug{version_url}")
+            app.include_router(router=debug_router, prefix=f"{version_url}/debug")
     return app

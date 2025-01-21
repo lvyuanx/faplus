@@ -1,6 +1,6 @@
 import io
 import urllib.parse
-import uuid
+from typing import Any
 
 from fastapi.responses import StreamingResponse, Response as FAResponse
 from faplus.utils.config_util import StatusCodeEnum
@@ -19,8 +19,8 @@ class Response(object):
         return ResponseSchema(code=StatusCodeEnum.请求成功, msg=msg, data=data)
 
     @staticmethod
-    def fail(code: str, msg: str):
-        return ResponseSchema(code=code, msg=msg, data=None)
+    def fail(code: str, msg: str, data: Any = None):
+        return ResponseSchema(code=code, msg=msg, data=data)
 
     @staticmethod
     def download(file: bytes, file_name: str = None):

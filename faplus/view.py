@@ -28,6 +28,18 @@ logger = logging.getLogger(__package__)
 import functools
 
 def version(version_tag: str):
+    """指定接口的版本
+    
+    版本格式：
+        MAJOR.MINOR.PATCH
+        当您做了不兼容的API修改时增加主版本号（MAJOR）。
+        当您以向后兼容的方式添加功能时增加次版本号（MINOR）。
+        当您进行向后兼容的问题修复时增加修订版本号（PATCH）。
+
+    :param version_tag: 表示指定版本
+    :return:
+    """
+    
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):

@@ -43,14 +43,13 @@ FAP_DESCRIPTION = f"""
 * {ViewStatusEnum.test}: 表示接口开发完成，正在测试。
 * {ViewStatusEnum.success}: 表示接口已经实现，并且已经测试通过。
 
-**注意：如果文档标题中含有`🐞`表示该接口仅仅在开发环境中生效，生产环境无法使用**
+**注意：如果文档标题中含有`🐞`表示该接口仅仅在开发环境中生效，生产环境无法使用; 如果有：✨:<version_tag> 表示该接口在指定版本下可用**
 """
 
-# 文档版本
+# 版本
 FAP_VERSION = "0.0.1"
 
 # 开启的版本
-# OPEN_VERSION = [""]
 FAP_VERSION_CONFIG = {}  # 版本配置 key: 版本标记，为@verion(<版本标记>)中的值，value：版本的根路由
 FAP_OPEN_DFTDAULT_VERSION = True
 

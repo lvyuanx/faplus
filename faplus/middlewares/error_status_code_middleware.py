@@ -13,6 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 import logging
 
 from faplus.utils import StatusCodeEnum, Response as ApiResponse
+from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY, HTTP_200_OK
 
 logger = logging.getLogger(__package__)
 
@@ -35,7 +36,7 @@ class ErrorStatusCodeMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         res = await call_next(request)
         status_code = res.status_code
-        if status_code == 200:
+        if status_code in [HTTP_200_OK, HTTP_422_UNPROCESSABLE_ENTITY]:
             return res
         else:
             logger.error(f"Response: {status_code}")

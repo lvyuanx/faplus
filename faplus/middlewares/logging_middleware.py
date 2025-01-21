@@ -19,7 +19,7 @@ logger = logging.getLogger(__package__)
 
 status_code_dict = {404: StatusCodeEnum.请求不存在}
 
-end_format = "*" * 15 + "{url}" + "*" * 15 + "\n"
+end_format = "*" * 15 + "{url}" + "*" * 15
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
@@ -30,7 +30,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         content_type = request.headers.get("Content-Type", "")
         method = request.method
         path = request.url.path
-        logger.info(f"Request: 【{method}】; content-type:{content_type}; url:{path}")
+        logger.info(f"\nRequest: 【{method}】; content-type:{content_type}; url:{path}")
         try:
             if get_setting_with_default("DEBUG", True):
                 with app_util.Timer():
