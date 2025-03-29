@@ -19,6 +19,11 @@ from faplus.auth.schemas import UserSchema
 from faplus.auth import const
 from faplus.cache import cache
 from faplus.utils import crypto_util, StatusCodeEnum
+from faplus.utils import get_setting_with_default
+
+
+FAP_GUEST_USERS = get_setting_with_default("FAP_GUEST_USERS", [])
+FAP_GUEST_USER_DICT = {user.username: user for user in FAP_GUEST_USERS}
 
 
 logger = logging.getLogger(__package__)
@@ -33,6 +38,11 @@ async def get_user_info(**kwargs):
             return json.loads(user_str)
     user = await User.filter(**kwargs, is_active=True, is_delete=False).first()
     if not user:
+        # 查看是否是游客登陆
+        username = crypto_util.secure_decrypt(kwargs["username"])
+        user = FAP_GUEST_USER_DICT.get(username)
+        if user and kwargs["password"] == crypto_util.enc_pwd(user.password):  # 密码正确
+            return user.to_dict()
         raise FAPStatusCodeException(StatusCodeEnum.用户不存在)
 
     user_dict = UserSchema.from_orm(user).dict()

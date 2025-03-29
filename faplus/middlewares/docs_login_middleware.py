@@ -8,10 +8,13 @@
 # Description: 在线文档登录拦截器
 """
 import logging
+import base64
 
-from fastapi import Request, Response
+from fastapi import Request, Response, HTTPException
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.responses import JSONResponse
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from faplus.utils import get_setting_with_default
 from faplus.auth.utils import user_util
@@ -34,16 +37,35 @@ class DocsLoginMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         
         tk = request.cookies.get(FAP_TOKEN_TAG)
-        if tk:
+        if tk and token_util.verify_token(tk):
             return await call_next(request)
         
-        query = request.query_params
-        username = query.get("username")
-        password = query.get("password")
+        # 提取Authorization头部
+        auth_header = request.headers.get("Authorization")
+        if not auth_header:
+            return JSONResponse(
+                status_code=HTTP_401_UNAUTHORIZED,
+                content={"detail": "Missing credentials"},
+                headers={"WWW-Authenticate": "Basic realm='Protected Area'"}
+            )
+        
+        # 验证头部格式
+        try:
+            scheme, encoded = auth_header.split()
+            if scheme.lower() != "basic":
+                raise ValueError
+            decoded = base64.b64decode(encoded).decode("utf-8")
+            username, password = decoded.split(":", 1)
+        except (ValueError, UnicodeDecodeError):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication format",
+                headers={"WWW-Authenticate": "Basic"}
+            )
+        
         if username and password:
             try:
                 user = await user_util.authenticate_user(username=username, password=password)
-                print(user)
                 if user:
                     token = await token_util.create_token({"uid": user["id"]})
                     response = RedirectResponse(url=path, status_code=302)
