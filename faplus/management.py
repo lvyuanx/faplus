@@ -92,6 +92,7 @@ class Management:
         """启动服务器"""
         import uvicorn
         import json
+        from faplus.utils import get_setting_with_default
 
         host, port = self.command_args.host_port.split(":")
 
@@ -101,7 +102,9 @@ class Management:
             "port": int(port),
             "reload": self.command_args.reload,
             "workers": self.command_args.workers,
-            "log_level": "error",
+            "log_level": "debug",
+            "log_config": get_setting_with_default("LOGGING")
+            
         }
 
         os.environ.setdefault("UVICORN_KWARGS", json.dumps(uvicorn_kwargs))

@@ -13,6 +13,10 @@ from functools import wraps
 logger = logging.getLogger(__package__)
 
 class Timer:
+    
+    def __init__(self, target: str = None) -> None:
+        self.target = target
+    
     def __enter__(self):
         # 在进入 with 代码块时记录当前时间
         self.start_time = time.time()
@@ -22,7 +26,7 @@ class Timer:
         # 在退出 with 代码块时计算执行时间
         self.end_time = time.time()
         self.duration = self.end_time - self.start_time
-        logger.debug(f"Execution time: {self.duration} seconds")
+        logger.debug(f"{self.target} Execution time: {self.duration} seconds")
         return False
 
 def timer(func):
