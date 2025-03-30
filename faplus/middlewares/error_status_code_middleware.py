@@ -13,7 +13,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 import logging
 
 from faplus.utils import StatusCodeEnum, Response as ApiResponse
-from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY, HTTP_200_OK
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_422_UNPROCESSABLE_ENTITY, HTTP_200_OK
 
 logger = logging.getLogger(__package__)
 

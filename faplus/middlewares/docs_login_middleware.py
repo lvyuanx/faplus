@@ -37,7 +37,7 @@ class DocsLoginMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         
         tk = request.cookies.get(FAP_TOKEN_TAG)
-        if tk and token_util.verify_token(tk):
+        if tk and await token_util.verify_token(tk):
             return await call_next(request)
         
         # 提取Authorization头部

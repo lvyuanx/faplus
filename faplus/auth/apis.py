@@ -1,14 +1,15 @@
 from faplus.core import settings
+from .views.user import login_view, logout_view
 
 DEBUG = getattr(settings, "DEBUG", True)
 FAP_LOGIN_URL = getattr(settings, "FAP_LOGIN_URL", None)
 
-apis = {}
-
-if not FAP_LOGIN_URL:
-    from .views.user import login_view
-
-    apis[""] = [("07", "/login", login_view, "登录")]
+apis = {
+    "": [
+        ("09", "/login", login_view, "登录"),
+        ("10", "/logout", logout_view, "登出"),
+    ]
+}
 
 
 if DEBUG:
