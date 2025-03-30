@@ -13,14 +13,14 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from faplus import const
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 from faplus.cache import cache
 
 
 logger = logging.getLogger(__package__)
 
-FAP_JWT_WHITES = get_setting_with_default("FAP_JWT_WHITES")
-FAP_LOGIN_URL = get_setting_with_default("FAP_LOGIN_URL")
+FAP_JWT_WHITES = settings.FAP_JWT_WHITES
+FAP_LOGIN_URL = settings.FAP_LOGIN_URL
 
 # 白名单 + 登录地址
 whitelist = FAP_JWT_WHITES + [

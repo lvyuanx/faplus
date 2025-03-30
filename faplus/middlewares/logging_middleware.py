@@ -12,12 +12,12 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 import logging
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 from faplus.utils import app_util
 
 logger = logging.getLogger(__package__)
 
-DEBUG = get_setting_with_default("DEBUG", True)
+DEBUG = getattr(settings, "DEBUG", True)
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(

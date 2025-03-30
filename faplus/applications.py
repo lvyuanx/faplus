@@ -13,7 +13,7 @@ from typing import Tuple, Union
 from functools import partial
 
 from fastapi.applications import FastAPI
-from faplus.utils import settings, dft_settings
+from faplus.utils import settings
 
 
 package = __package__
@@ -63,12 +63,8 @@ class FastApiPlusApplication(object):
 
     def event_register(self, app: FastAPI):
         """事件注册"""
-        startups: list[Union[str, Tuple[str, dict]]] = getattr(
-            settings, "FAP_STARTUP_FUNCS", dft_settings.FAP_STARTUP_FUNCS
-        )
-        shutdowns: list[Union[str, Tuple[str, dict]]] = getattr(
-            settings, "FAP_SHUTDOWN_FUNCS", dft_settings.FAP_SHUTDOWN_FUNCS
-        )
+        startups: list[Union[str, Tuple[str, dict]]] = settings.FAP_STARTUP_FUNCS
+        shutdowns: list[Union[str, Tuple[str, dict]]] = settings.FAP_SHUTDOWN_FUNCS
 
         def add_event(event_name: str, events: list[Union[str, Tuple[str, dict]]]):
 
@@ -97,9 +93,7 @@ class FastApiPlusApplication(object):
 
     def middleware_register(self, app: FastAPI):
         """中间件注册"""
-        middlewares: list[Union[str, Tuple[str, dict]]] = getattr(
-            settings, "FAP_MIDDLEWARE_CLASSES", dft_settings.FAP_MIDDLEWARE_CLASSES
-        )
+        middlewares: list[Union[str, Tuple[str, dict]]] = settings.FAP_MIDDLEWARE_CLASSES
         for middleware in middlewares:
 
             if isinstance(middleware, str):
@@ -121,11 +115,9 @@ class FastApiPlusApplication(object):
                 app.add_middleware(middleware_cls)
 
     def websocket_register(self, app: FastAPI):
-        from .utils import settings, dft_settings
+        from .utils import settings
 
-        websocket_routes: list[str] = getattr(
-            settings, "FAP_WS_CLASSES", dft_settings.FAP_WS_CLASSES
-        )
+        websocket_routes: list[str] = settings.FAP_WS_CLASSES
         for websocket_route in websocket_routes:
             path, ws_name = websocket_route.rsplit(".", 1)
             module = importlib.import_module(path)

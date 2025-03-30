@@ -1,39 +1,88 @@
-import importlib
+# -*-coding:utf-8 -*-
+
+"""
+# File       : config_util2.py
+# Time       : 2025-03-29 23:23:56
+# Author     : lyx
+# version    : python 3.11
+# Description: FAP 配置读取工具
+"""
 import logging
+import importlib
 import os
 
-logger = logging.getLogger("faplus")
+logger = logging.getLogger(__package__)
 
 
-class ModuleLoader:
-    def __init__(self, module_name="settings"):
-        self.module_name = module_name
-        self._settings = None  # 缓存模块
+class ConfigLoader:
 
-    def _load_settings(self):
-        if self._settings is None:
-            logger.debug("Loading settings...")
-            self._settings = importlib.import_module(self.module_name)
-        return self._settings
-
+    def __init__(
+            self, 
+            settings_module: str = "settings", 
+            default_settings: str = "faplus.default_settings", 
+            config_module: str = "config"
+        ):
+        self.config_module_name = config_module
+        self.config_module = None  # 初始化为 None
+        self.settings_module_name = settings_module
+        self.settings_module = None  # 初始化为 None
+        self.default_settings_module_name = default_settings
+        self.default_settings_module = None
+        self.merge_dict = {}
+        self.reload()
+    
+    def _load_config(self):
+        try:
+            self.config_module = importlib.import_module(self.config_module_name)
+        except ImportError:
+            self.config_module = None
+            logger.warning(f"config module {self.config_module_name} not found, use default config")
+        try:
+            self.settings_module = importlib.import_module(self.settings_module_name)
+        except ImportError:
+            self.settings_module = None
+            logger.warning(f"settings module {self.settings_module_name} not found, use default config")
+        try:
+            self.default_settings_module = importlib.import_module(self.default_settings_module_name)
+        except ImportError:
+            self.default_settings_module = None
+            logger.warning(f"default settings module {self.default_settings_module_name} not found, use default config")
+    
     def reload(self):
-        """重新加载 settings 模块"""
-        logger.debug("Reloading settings...")
-        self._settings = importlib.reload(self._load_settings())
-
+        self.config_module = None
+        self.settings_module = None
+        self.default_settings_module = None
+        self.merge_dict = {}
+        self._load_config()
+        
     def __getattr__(self, name):
-        # 触发懒加载
-        settings_module = self._load_settings()
-        if hasattr(settings_module, name):
-            return getattr(settings_module, name)
-        raise AttributeError(f"'settings' object has no attribute '{name}'")
+        if name in self.merge_dict:
+            return self.merge_dict[name]
+        # 检查 config_module 是否存在
+        if self.config_module is not None and hasattr(self.config_module, name):
+            value = getattr(self.config_module, name)
+            self.merge_dict[name] = value
+            return value
+        # 检查 settings_module 是否存在
+        if self.settings_module is not None and hasattr(self.settings_module, name):
+            value = getattr(self.settings_module, name)
+            self.merge_dict[name] = value
+            return value
+        # 检查 default_settings_module 是否存在
+        if self.default_settings_module is not None and hasattr(self.default_settings_module, name):
+            value = getattr(self.default_settings_module, name)
+            self.merge_dict[name] = value
+            return value
+        raise AttributeError(f"'settings' or 'config' object has no attribute '{name}'")
 
 
 FAP_SETTINGS_MODULE = os.environ.get("FAP_SETTINGS_MODULE")
+FAP_CONFIG_MODULE = os.environ.get("FAP_CONFIG_MODULE", "config")
 
-settings = ModuleLoader(FAP_SETTINGS_MODULE)  # settings.py 文件的模块名称
-
-dft_settings = ModuleLoader("faplus.default_settings")
+settings = ConfigLoader(
+    settings_module=FAP_SETTINGS_MODULE,
+    config_module=FAP_CONFIG_MODULE
+)
 
 
 def import_status_code_enum():
@@ -60,19 +109,3 @@ def import_status_code_enum():
 
 
 StatusCodeEnum = import_status_code_enum()
-
-
-def get_setting_with_default(cfg_name: str, *args):
-    """获取配置项，如果配置项不存在，则返回默认值
-    :param cfg_name: 配置项名称
-    :param args: 默认值
-    :return: 配置项值
-    """
-    if not args or len(args) < 1:
-        value = getattr(settings, cfg_name, None)
-        if not value:
-            return getattr(dft_settings, cfg_name)
-        else:
-            return value
-
-    return getattr(settings, cfg_name, args[0])

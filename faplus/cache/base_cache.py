@@ -7,12 +7,9 @@ Date: 2024/11/26 14:33:21
 Description: 缓存基类
 """
 
-from faplus.utils import settings, dft_settings
+from faplus.utils import settings
 
-FAP_CACHE_DEFAULT_EXPIRE = getattr(
-    settings, "FAP_CACHE_DEFAULT_EXPIRE", dft_settings.FAP_CACHE_DEFAULT_EXPIRE
-)
-
+FAP_CACHE_DEFAULT_EXPIRE = settings.FAP_CACHE_DEFAULT_EXPIRE
 
 class BaseCache(object):
     """缓存基类"""

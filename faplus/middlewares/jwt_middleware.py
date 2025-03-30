@@ -14,7 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 
 from faplus.utils import (
     StatusCodeEnum,
-    get_setting_with_default,
+    settings,
     Response as ApiResponse
 )
 from faplus.utils import token_util
@@ -24,8 +24,8 @@ from faplus import const
 
 logger = logging.getLogger(__package__)
 
-FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
-FAP_TOKEN_SOURCE = get_setting_with_default("FAP_TOKEN_SOURCE")
+FAP_TOKEN_TAG = settings.FAP_TOKEN_TAG
+FAP_TOKEN_SOURCE = settings.FAP_TOKEN_SOURCE
 TokenSourceEnum = const.TokenSourceEnum
 GUEST_USER_DICT = guest_util.generate_user_dict()
 

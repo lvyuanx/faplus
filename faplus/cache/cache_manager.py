@@ -10,7 +10,7 @@ import importlib
 import logging
 
 from .base_cache import BaseCache, FAP_CACHE_DEFAULT_EXPIRE
-from faplus.utils import settings, dft_settings
+from faplus.utils import settings
 
 logger = logging.getLogger(__package__)
 
@@ -119,6 +119,6 @@ class CacheManager(object):
         return await cache.ping()
 
 
-FAP_CACHE_CONFIG = getattr(settings, "FAP_CACHE_CONFIG", dft_settings.FAP_CACHE_CONFIG)
+FAP_CACHE_CONFIG = settings.FAP_CACHE_CONFIG
 
 cache = CacheManager(FAP_CACHE_CONFIG)

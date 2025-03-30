@@ -10,7 +10,7 @@
 import importlib
 import inspect
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 from tortoise.models import Model
 from faplus.models import ContentType
 from collections import defaultdict
@@ -19,7 +19,7 @@ from collections import defaultdict
 def content_type_register_event(**kwargs):
 
     async def do():
-        FAP_INSERTAPPS = get_setting_with_default("FAP_INSERTAPPS")
+        FAP_INSERTAPPS = settings.FAP_INSERTAPPS
         model_dict = defaultdict(list)
         for app in FAP_INSERTAPPS:
             try:

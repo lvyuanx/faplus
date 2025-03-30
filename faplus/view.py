@@ -16,12 +16,12 @@ from fastapi.responses import Response as FAResponse
 from tortoise.queryset import QuerySet
 
 from faplus.exceptions import FAPStatusCodeException
-from faplus.utils import get_setting_with_default, StatusCodeEnum
+from faplus.utils import settings, StatusCodeEnum
 from faplus.schema import ResponseSchema, ResponsePageSchema
 from faplus.utils.api_util import Response
 from .const import ViewStatusEnum
 
-FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
+FAP_TOKEN_TAG = settings.FAP_TOKEN_TAG
 
 logger = logging.getLogger(__package__)
 

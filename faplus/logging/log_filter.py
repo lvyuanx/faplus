@@ -9,7 +9,7 @@
 """
 import logging
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
 
 class AiomysqlFilter(logging.Filter):
@@ -22,7 +22,7 @@ class AiomysqlFilter(logging.Filter):
 class ProjectFilter(logging.Filter):
     """tortoise.db_client 和 aiomysql重复，需要去除冗余输出"""
 
-    PROJECT_APP_PACKAGES = get_setting_with_default("PROJECT_APP_PACKAGES")
+    PROJECT_APP_PACKAGES = settings.PROJECT_APP_PACKAGES
 
     def filter(self, record):
         # 只允许PROJECT_APP_PACKAGES的包前置缀，否则不输出

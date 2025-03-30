@@ -16,15 +16,15 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 from faplus.auth.utils import user_util
 from faplus.utils import token_util
 
-FAP_DOCS_URL = get_setting_with_default("FAP_DOCS_URL")
-FAP_REDOC_URL = get_setting_with_default("FAP_REDOC_URL")
-FAP_OPENAPI_URL = get_setting_with_default("FAP_OPENAPI_URL")
-DEBUG = get_setting_with_default("DEBUG")
-FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
+FAP_DOCS_URL = settings.FAP_DOCS_URL
+FAP_REDOC_URL = settings.FAP_REDOC_URL
+FAP_OPENAPI_URL = settings.FAP_OPENAPI_URL
+DEBUG = settings.DEBUG
+FAP_TOKEN_TAG = settings.FAP_TOKEN_TAG
 
 logger = logging.getLogger(__package__)
 

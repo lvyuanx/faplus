@@ -3,11 +3,11 @@
 import logging.config
 import os
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
 
 def load_logging_cfg():
-    logging_cfg = get_setting_with_default("LOGGING")
+    logging_cfg = settings.LOGGING
 
     assert logging_cfg is None or isinstance(
         logging_cfg, dict

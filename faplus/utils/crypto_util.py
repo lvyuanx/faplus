@@ -8,10 +8,10 @@ Description: 系统加解密工具
 """
 import importlib
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
-ENCRYPT_PWD = get_setting_with_default("FAP_ENCRYPT_PWD")
-COYPTO_SECURE_DATA = get_setting_with_default("FAP_COYPTO_SECURE_DATA")
+ENCRYPT_PWD = settings.FAP_ENCRYPT_PWD
+COYPTO_SECURE_DATA = settings.FAP_COYPTO_SECURE_DATA
 
 # 密码的加密
 enc_pwd_module = importlib.import_module(ENCRYPT_PWD)

@@ -9,12 +9,12 @@
 """
 import logging
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
 logger = logging.getLogger(__package__)
 
 def generate_user_dict():
-    FAP_GUEST_USERS = get_setting_with_default("FAP_GUEST_USERS")
+    FAP_GUEST_USERS = settings.FAP_GUEST_USERS
     gest_user_dict = {}
     for user in FAP_GUEST_USERS:
         gest_user_dict[user.username] = user

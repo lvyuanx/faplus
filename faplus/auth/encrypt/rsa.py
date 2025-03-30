@@ -13,12 +13,12 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
 logger = logging.getLogger("FastApiPlus-RSA")
 
-PUBLICK_KEY = get_setting_with_default("FAP_PUBLICK_KEY")
-PRIVATE_KEY = get_setting_with_default("FAP_PRIVATE_KEY")
+PUBLICK_KEY = settings.FAP_PUBLICK_KEY
+PRIVATE_KEY = settings.FAP_PRIVATE_KEY
 
 
 def generate_key():

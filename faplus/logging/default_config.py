@@ -1,10 +1,10 @@
 import os 
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
-log_level = get_setting_with_default("LOG_LEVEL")
-log_dir = get_setting_with_default("LOG_DIR")
-logging_cfg = get_setting_with_default("LOGGING")
+log_level = settings.LOG_LEVEL
+log_dir = settings.LOG_DIR
+logging_cfg = settings.LOGGING
 
 assert log_level.upper() in (
     "DEBUG",

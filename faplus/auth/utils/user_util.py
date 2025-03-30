@@ -19,10 +19,10 @@ from faplus.auth.schemas import UserSchema
 from faplus.auth import const
 from faplus.cache import cache
 from faplus.utils import crypto_util, StatusCodeEnum
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
 
-FAP_GUEST_USERS = get_setting_with_default("FAP_GUEST_USERS", [])
+FAP_GUEST_USERS = getattr(settings, "FAP_GUEST_USERS", [])
 FAP_GUEST_USER_DICT = {user.username: user for user in FAP_GUEST_USERS}
 
 

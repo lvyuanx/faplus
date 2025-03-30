@@ -13,13 +13,13 @@ from datetime import datetime, timedelta
 import jwt  # PyJWT库
 
 from faplus import const
-from faplus.utils import get_setting_with_default, time_util
+from faplus.utils import settings, time_util
 from faplus.cache import cache
 
 
-SECRET_KEY = get_setting_with_default("FAP_SECRET_KEY")
-ALGORITHM = get_setting_with_default("FAP_ALGORITHM")
-FAP_TOKEN_EXPIRE = get_setting_with_default("FAP_TOKEN_EXPIRE")
+SECRET_KEY = settings.FAP_SECRET_KEY
+ALGORITHM = settings.FAP_ALGORITHM
+FAP_TOKEN_EXPIRE = settings.FAP_TOKEN_EXPIRE
 
 
 logger = logging.getLogger(__package__)

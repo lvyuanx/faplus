@@ -3,7 +3,7 @@ import logging
 
 from datetime import datetime
 import os
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 from faplus.utils import time_util
 
 logger = logging.getLogger(__package__)
@@ -57,7 +57,7 @@ docs: http://{host}:{port}{docs_url}
 
 def run_info_event(**kwargs):
     async def do():
-        DEBUG = get_setting_with_default("DEBUG")
+        DEBUG = settings.DEBUG
         if not DEBUG:
             return
 
@@ -67,9 +67,9 @@ def run_info_event(**kwargs):
 
         kwargs = json.loads(kwargs_str)
 
-        FAP_REDOC_URL = get_setting_with_default("FAP_REDOC_URL")
-        FAP_DOCS_URL = get_setting_with_default("FAP_DOCS_URL")
-        FAP_VERSION = get_setting_with_default("FAP_VERSION")
+        FAP_REDOC_URL = settings.FAP_REDOC_URL
+        FAP_DOCS_URL = settings.FAP_DOCS_URL
+        FAP_VERSION = settings.FAP_VERSION
         time_str = time_util.now_str()
         logger.info(
             print_template.format(

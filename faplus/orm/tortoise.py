@@ -12,23 +12,23 @@ import logging
 
 from tortoise import Model
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
 logger = logging.getLogger("FAPlus")
 
-USERNAME = get_setting_with_default("DB_USERNAME")
-PASSWORD = get_setting_with_default("DB_PASSWORD")
-HOST = get_setting_with_default("DB_HOST")
-PORT = get_setting_with_default("DB_PORT")
-DATABASE = get_setting_with_default("DB_DATABASE")
-ENGINE = get_setting_with_default("DB_ENGINE")
-CHARSET = get_setting_with_default("DB_CHARSET")
-TIMEZONE = get_setting_with_default("DB_TIMEZONE")
-MAXSIZE = get_setting_with_default("DB_MAXSIZE")
-MINSIZE = get_setting_with_default("DB_MINSIZE")
-GENERATE_SCHEMAS = get_setting_with_default("DB_GENERATE_SCHEMAS")
-INSERTAPPS = get_setting_with_default("FAP_INSERTAPPS")
-DEBUG = get_setting_with_default("DEBUG")
+USERNAME = settings.DB_USERNAME
+PASSWORD = settings.DB_PASSWORD
+HOST = settings.DB_HOST
+PORT = settings.DB_PORT
+DATABASE = settings.DB_DATABASE
+ENGINE = settings.DB_ENGINE
+CHARSET = settings.DB_CHARSET
+TIMEZONE = settings.DB_TIMEZONE
+MAXSIZE = settings.DB_MAXSIZE
+MINSIZE = settings.DB_MINSIZE
+GENERATE_SCHEMAS = settings.DB_GENERATE_SCHEMAS
+INSERTAPPS = settings.FAP_INSERTAPPS
+DEBUG = settings.DEBUG
 
 
 def has_model_subclasses(module):

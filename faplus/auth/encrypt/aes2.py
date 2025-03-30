@@ -12,9 +12,9 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 import base64
 
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
-FAP_AES2_KEY = get_setting_with_default("FAP_AES2_KEY")
+FAP_AES2_KEY = settings.FAP_AES2_KEY
 
 
 def encrypt(data: str, key: str = None) -> str:

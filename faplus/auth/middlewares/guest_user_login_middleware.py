@@ -15,16 +15,16 @@ from fastapi import Request, Response
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
-from faplus.utils import get_setting_with_default, token_util
+from faplus.utils import settings, token_util
 from faplus.auth.utils import guest_util
 from faplus import const as faplus_const
 
 logger = logging.getLogger(__package__)
 TokenSourceEnum = faplus_const.TokenSourceEnum
-FAP_TOKEN_TAG = get_setting_with_default("FAP_TOKEN_TAG")
-DEBUG = get_setting_with_default("DEBUG")
-FAP_GEST_USERS_LOGIN_URL = get_setting_with_default("FAP_GEST_USERS_LOGIN_URL")
-FAP_TOKEN_SOURCE = get_setting_with_default("FAP_TOKEN_SOURCE")
+FAP_TOKEN_TAG = settings.FAP_TOKEN_TAG
+DEBUG = settings.DEBUG
+FAP_GEST_USERS_LOGIN_URL = settings.FAP_GEST_USERS_LOGIN_URL
+FAP_TOKEN_SOURCE = settings.FAP_TOKEN_SOURCE
 
 GUEST_USER_DICT = guest_util.generate_user_dict()
 

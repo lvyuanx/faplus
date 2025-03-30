@@ -17,7 +17,7 @@ import uuid
 from fastapi import FastAPI, APIRouter
 from fastapi.staticfiles import StaticFiles
 from pydantic.main import BaseModel
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 from faplus.utils import data_util
 from faplus.schema import ErrorResponseSchema
 from fastapi.openapi.docs import (
@@ -26,25 +26,25 @@ from fastapi.openapi.docs import (
     get_swagger_ui_oauth2_redirect_html,
 )
 
-APPLIICATION_ROOT = get_setting_with_default("APPLICATION_ROOT")  # 程序根app路径
-FAP_DOCS_URL = get_setting_with_default("FAP_DOCS_URL")
-FAP_REDOC_URL = get_setting_with_default("FAP_REDOC_URL")
-FAP_DOC_IS_LOCAL_STATIC = get_setting_with_default("FAP_DOC_IS_LOCAL_STATIC")
-FAP_STATIC_URL = get_setting_with_default("FAP_STATIC_URL")
-FAP_STATIC_NAME = get_setting_with_default("FAP_STATIC_NAME")
-FAP_TITLE = get_setting_with_default("FAP_TITLE")
-FAP_DESCRIPTION = get_setting_with_default("FAP_DESCRIPTION")
-FAP_VERSION = get_setting_with_default("FAP_VERSION")
-FAP_CONTACT = get_setting_with_default("FAP_CONTACT")
-FAP_LICENSE = get_setting_with_default("FAP_LICENSE")
-FAP_OPENAPI_URL = get_setting_with_default("FAP_OPENAPI_URL")
-FAP_APP_DEBUG = get_setting_with_default("FAP_APP_DEBUG")
-FAP_API_CODE_NUM = get_setting_with_default("FAP_API_CODE_NUM")
-FAP_API_EXAMPLE_ADAPTER = get_setting_with_default("FAP_API_EXAMPLE_ADAPTER")
-FAP_INSERTAPPS = get_setting_with_default("FAP_INSERTAPPS")
-DEBUG = get_setting_with_default("DEBUG")
-VERSION_CONFIG = get_setting_with_default("FAP_VERSION_CONFIG")
-OPEN_DFTDAULT_VERSION = get_setting_with_default("FAP_OPEN_DFTDAULT_VERSION")
+APPLIICATION_ROOT = settings.APPLICATION_ROOT  # 程序根app路径
+FAP_DOCS_URL = settings.FAP_DOCS_URL
+FAP_REDOC_URL = settings.FAP_REDOC_URL
+FAP_DOC_IS_LOCAL_STATIC = settings.FAP_DOC_IS_LOCAL_STATIC
+FAP_STATIC_URL = settings.FAP_STATIC_URL
+FAP_STATIC_NAME = settings.FAP_STATIC_NAME
+FAP_TITLE = settings.FAP_TITLE
+FAP_DESCRIPTION = settings.FAP_DESCRIPTION
+FAP_VERSION = settings.FAP_VERSION
+FAP_CONTACT = settings.FAP_CONTACT
+FAP_LICENSE = settings.FAP_LICENSE
+FAP_OPENAPI_URL = settings.FAP_OPENAPI_URL
+FAP_APP_DEBUG = settings.FAP_APP_DEBUG
+FAP_API_CODE_NUM = settings.FAP_API_CODE_NUM
+FAP_API_EXAMPLE_ADAPTER = settings.FAP_API_EXAMPLE_ADAPTER
+FAP_INSERTAPPS = settings.FAP_INSERTAPPS
+DEBUG = settings.DEBUG
+VERSION_CONFIG = settings.FAP_VERSION_CONFIG
+OPEN_DFTDAULT_VERSION = settings.FAP_OPEN_DFTDAULT_VERSION
 
 
 logger = logging.getLogger(__package__)

@@ -9,7 +9,7 @@ Description: 媒体管理
 import logging
 import os
 from typing import Dict, List
-from faplus.utils import get_setting_with_default
+from faplus.utils import settings
 
 from fastapi import UploadFile
 from .utils import file_util
@@ -17,10 +17,10 @@ from .models import FileRecord
 from tortoise.transactions import in_transaction
 from . import const
 
-BASE_DIR = get_setting_with_default("BASE_DIR")
-MEDIA_ROOT = get_setting_with_default("FAP_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
-MEDIA_URL = get_setting_with_default("FAP_MEDIA_URL")
-FAP_TEMP_DIR = get_setting_with_default("FAP_TEMP_DIR", os.path.join(MEDIA_ROOT, "temp"))
+BASE_DIR = settings.BASE_DIR
+MEDIA_ROOT = getattr(settings, "FAP_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
+MEDIA_URL = settings.FAP_MEDIA_URL
+FAP_TEMP_DIR = getattr(settings, "FAP_TEMP_DIR", os.path.join(MEDIA_ROOT, "temp"))
 
 logger = logging.getLogger("media")
 
