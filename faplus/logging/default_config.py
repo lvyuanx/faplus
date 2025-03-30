@@ -1,6 +1,6 @@
 import os 
 
-from faplus.utils import settings
+from faplus.core import settings
 
 log_level = settings.LOG_LEVEL
 log_dir = settings.LOG_DIR

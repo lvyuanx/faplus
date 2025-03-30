@@ -9,7 +9,7 @@
 """
 import logging
 
-from faplus.utils import settings
+from faplus.core import settings
 
 
 class AiomysqlFilter(logging.Filter):

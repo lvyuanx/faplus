@@ -16,7 +16,7 @@ from fastapi.responses import Response as FAResponse
 from tortoise.queryset import QuerySet
 
 from faplus.exceptions import FAPStatusCodeException
-from faplus.utils import settings, StatusCodeEnum
+from faplus.core import settings, StatusCodeEnum
 from faplus.schema import ResponseSchema, ResponsePageSchema
 from faplus.utils.api_util import Response
 from .const import ViewStatusEnum

@@ -9,7 +9,7 @@
 """
 import logging
 
-from faplus.utils import settings
+from faplus.core import settings
 
 logger = logging.getLogger(__package__)
 

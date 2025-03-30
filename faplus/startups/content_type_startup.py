@@ -10,7 +10,7 @@
 import importlib
 import inspect
 
-from faplus.utils import settings
+from faplus.core import settings
 from tortoise.models import Model
 from faplus.models import ContentType
 from collections import defaultdict

@@ -8,7 +8,7 @@ Description: 系统加解密工具
 """
 import importlib
 
-from faplus.utils import settings
+from faplus.core import settings
 
 ENCRYPT_PWD = settings.FAP_ENCRYPT_PWD
 COYPTO_SECURE_DATA = settings.FAP_COYPTO_SECURE_DATA

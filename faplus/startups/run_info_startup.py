@@ -3,7 +3,7 @@ import logging
 
 from datetime import datetime
 import os
-from faplus.utils import settings
+from faplus.core import settings
 from faplus.utils import time_util
 
 logger = logging.getLogger(__package__)

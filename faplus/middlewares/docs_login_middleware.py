@@ -16,7 +16,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.responses import JSONResponse
 from starlette.status import HTTP_401_UNAUTHORIZED
 
-from faplus.utils import settings
+from faplus.core import settings
 from faplus.auth.utils import user_util
 from faplus.utils import token_util
 

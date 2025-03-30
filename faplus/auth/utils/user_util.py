@@ -19,7 +19,7 @@ from faplus.auth.schemas import UserSchema
 from faplus.auth import const
 from faplus.cache import cache
 from faplus.utils import crypto_util, StatusCodeEnum
-from faplus.utils import settings
+from faplus.core import settings
 
 
 FAP_GUEST_USERS = getattr(settings, "FAP_GUEST_USERS", [])

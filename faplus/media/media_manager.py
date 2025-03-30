@@ -9,7 +9,7 @@ Description: 媒体管理
 import logging
 import os
 from typing import Dict, List
-from faplus.utils import settings
+from faplus.core import settings
 
 from fastapi import UploadFile
 from .utils import file_util

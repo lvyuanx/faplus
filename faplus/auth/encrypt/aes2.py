@@ -12,7 +12,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 import base64
 
-from faplus.utils import settings
+from faplus.core import settings
 
 FAP_AES2_KEY = settings.FAP_AES2_KEY
 

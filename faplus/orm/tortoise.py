@@ -12,7 +12,7 @@ import logging
 
 from tortoise import Model
 
-from faplus.utils import settings
+from faplus.core import settings
 
 logger = logging.getLogger("FAPlus")
 

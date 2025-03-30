@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.padding import PKCS7
 
-from faplus.utils import settings
+from faplus.core import settings
 
 FAP_AES_KEY = settings.FAP_AES_KEY
 

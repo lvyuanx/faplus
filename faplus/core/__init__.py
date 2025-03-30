@@ -1,4 +1,1 @@
-from faplus.utils.config_util import (
-    settings,
-    StatusCodeEnum
-)
+from faplus.utils.config_util import settings, StatusCodeEnum

@@ -7,7 +7,7 @@ Date: 2024/11/26 14:33:21
 Description: 缓存基类
 """
 
-from faplus.utils import settings
+from faplus.core import settings
 
 FAP_CACHE_DEFAULT_EXPIRE = settings.FAP_CACHE_DEFAULT_EXPIRE
 

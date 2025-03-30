@@ -13,7 +13,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 
 from faplus import const
-from faplus.utils import settings
+from faplus.core import settings
 from faplus.cache import cache
 
 

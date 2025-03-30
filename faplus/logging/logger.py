@@ -3,7 +3,7 @@
 import logging.config
 import os
 
-from faplus.utils import settings
+from faplus.core import settings
 
 
 def load_logging_cfg():

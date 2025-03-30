@@ -13,7 +13,7 @@ from typing import Tuple, Union
 from functools import partial
 
 from fastapi.applications import FastAPI
-from faplus.utils import settings
+from faplus.core import settings
 
 
 package = __package__

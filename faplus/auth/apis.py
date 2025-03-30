@@ -1,4 +1,4 @@
-from faplus.utils import settings
+from faplus.core import settings
 
 DEBUG = getattr(settings, "DEBUG", True)
 FAP_LOGIN_URL = getattr(settings, "FAP_LOGIN_URL", None)

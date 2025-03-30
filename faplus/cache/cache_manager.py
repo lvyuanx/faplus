@@ -10,7 +10,7 @@ import importlib
 import logging
 
 from .base_cache import BaseCache, FAP_CACHE_DEFAULT_EXPIRE
-from faplus.utils import settings
+from faplus.core import settings
 
 logger = logging.getLogger(__package__)
 

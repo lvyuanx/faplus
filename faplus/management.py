@@ -92,7 +92,7 @@ class Management:
         """启动服务器"""
         import uvicorn
         import json
-        from faplus.utils import settings
+        from faplus.core import settings
 
         host, port = self.command_args.host_port.split(":")
 
