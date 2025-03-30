@@ -160,5 +160,5 @@ FAP_MEDIA_URL = "/media"
 
 FAP_TEMP_DIR = None
 
-FAP_GEST_USERS_LOGIN_URL = "/guest/login"
+FAP_GEST_USERS_LOGIN_URL = "/glogin"
 FAP_GUEST_USERS = []

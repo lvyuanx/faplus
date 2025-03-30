@@ -8,12 +8,16 @@
 # Description: 访客登录中间件
 """
 
+import base64
 import logging
 from typing import Union, Callable, Dict
 import json
 from fastapi import Request, Response
+from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.responses import JSONResponse
+from starlette.status import HTTP_401_UNAUTHORIZED
 
 from faplus.utils import settings, token_util
 from faplus.auth.utils import guest_util
@@ -91,8 +95,28 @@ class GuestUserLoginMiddleware(BaseHTTPMiddleware):
         if not path.endswith(FAP_GEST_USERS_LOGIN_URL):
             return await call_next(request)
 
-        username = request.query_params.get("username")
-        password = request.query_params.get("password")
+        # 提取Authorization头部
+        auth_header = request.headers.get("Authorization")
+        if not auth_header:
+            return JSONResponse(
+                status_code=HTTP_401_UNAUTHORIZED,
+                content={"detail": "Missing credentials"},
+                headers={"WWW-Authenticate": "Basic realm='Protected Area'"}
+            )
+        
+        # 验证头部格式
+        try:
+            scheme, encoded = auth_header.split()
+            if scheme.lower() != "basic":
+                raise ValueError
+            decoded = base64.b64decode(encoded).decode("utf-8")
+            username, password = decoded.split(":", 1)
+        except (ValueError, UnicodeDecodeError):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication format",
+                headers={"WWW-Authenticate": "Basic"}
+            )
  
         if not username or not password:
             return Response(status_code=404)
